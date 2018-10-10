@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 9/18/2018
+//* Date: 10/2/2018
 //****************************************************
 
 #include "Card.h"
@@ -61,10 +61,27 @@ string Card::getSuit()
 // Function Name: cardToString
 // Purpose: get the string value of the card
 // Parameters: none
-// Return value: return the string representation of the card
+// Return value: the string representation of the card
 // Assistance Received: none
 // ****************************************************************
 string Card::cardToString()
 {
    return this->getSuit() + this->getFace();
+}
+
+string Card::cardToString() const
+{
+   const string& suitValue = as_const(suit);
+   const string& faceValue = as_const(face);
+
+   return suitValue + faceValue;
+}
+
+bool operator==(const Card & card1, const Card & card2)
+{
+   if (card1.cardToString() == card2.cardToString())
+   {
+      return true;
+   }
+   return false;
 }

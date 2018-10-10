@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 9/18/2018
+//* Date: 10/2/2018
 //****************************************************
 
 #pragma once
@@ -10,13 +10,6 @@
 
 class Card
 {
-private:
-	// holds face value of the card
-	string face;
-
-	// holds suit value of the card
-	string suit;
-
 public:
 	Card();
 
@@ -27,4 +20,15 @@ public:
 	string getSuit();
 
    string cardToString();
+
+   string cardToString() const;
+
+   friend bool operator==(const Card& card1, const Card& card2);
+
+private:
+   // holds face value of the card
+   string face;
+
+   // holds suit value of the card
+   string suit;
 };

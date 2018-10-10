@@ -2,28 +2,22 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 9/18/2018
+//* Date: 10/2/2018
 //****************************************************
 
 #include "stdafx.h"
-#include "Deck.h"
+#include "Tournament.h"
 
 int main()
 {
-	cout << "Hello world" << endl;
+   //Tournament tournament;
 
-   Deck deck;
+   Round round;
+   //round.printDeckConfigChoices();
+   round.startGame();
+   round.printCardsOnHand();
 
-//   deck.printDeck();
-   deck.shuffleDeck();
-
-   deck.printDeck();
-
-   for (int i = 0; i < 8; i++)
-   {
-      Card card = deck.dealCard();
-      cout << "\n" + card.cardToString();
-   }
+   round.buildOption();
 
    system("pause");
 	return 0;

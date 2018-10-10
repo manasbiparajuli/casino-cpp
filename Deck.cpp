@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 9/18/2018
+//* Date: 10/2/2018
 //****************************************************
 
 #include "Deck.h"
@@ -48,21 +48,21 @@ void Deck::shuffleDeck()
 
    // shuffle the deck of cards using seed value
    shuffle(deck.begin(), deck.end(), rng);
+
+   // reversed the card so that 1st card is placed at the end of the vector
+   // then we can use pop_back() function to deal the first card
+   reverse(deck.begin(), deck.end());
 }
 
 // ****************************************************************
 // Function Name: dealCard
 // Purpose: to draw one card from the deck
 // Parameters: none
-// Return value: Card object 
+// Return value: The topmost card on the deck, a Card object
 // Assistance Received: none
 // ****************************************************************
 Card Deck::dealCard()
 {
-   // reversed the card so that 1st card is placed at the end of the vector
-   // then we can use pop_back() function to deal the first card
-   reverse(deck.begin(), deck.end());
-
    // get the first card and decrease the vector size by 1
    auto cardOnTop = deck.back();
    deck.pop_back();
@@ -78,20 +78,46 @@ Card Deck::dealCard()
 // ****************************************************************
 void Deck::printDeck()
 {
+   cout << "helo" << endl;
    for (auto card : deck)
    {
       cout << card.cardToString() + " ";
    }
+   cout << endl;
 }
 
 // ****************************************************************
-// Function Name: isDeckEmpty()
+// Function Name: isDeckEmpty
 // Purpose: checks if the deck is empty
 // Parameters: none
 // Return value: returns true or false based on whether the deck is empty or not
 // Assistance Received: none
 // ****************************************************************
-bool Deck::isDeckEmpty()
+bool Deck::isDeckEmpty() const
 {
    return deck.empty();
+}
+
+// ****************************************************************
+// Function Name: getDeck
+// Purpose: get the current deck
+// Parameters: none
+// Return value: returns the current deck used in the game
+// Assistance Received: none
+// ****************************************************************
+vector<Card> Deck::getDeck()
+{
+   return deck;
+}
+
+// ****************************************************************
+// Function Name: setDeck
+// Purpose: set the current deck
+// Parameters: card, a vector<Card> type. The deck to be used for the game
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
+void Deck::setDeck(vector<Card> tempDeck)
+{
+   deck = tempDeck;
 }

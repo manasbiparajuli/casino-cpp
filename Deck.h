@@ -2,17 +2,14 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 9/18/2018
+//* Date: 10/2/2018
 //****************************************************
 
 #pragma once
 #include "Card.h"
 
 class Deck 
-{
-private:
-	vector <Card> deck;
-   
+{   
 public:
 	Deck();
 
@@ -22,5 +19,12 @@ public:
 
    void printDeck();
 
-   bool isDeckEmpty();
+   bool isDeckEmpty() const;
+
+   vector<Card> getDeck();
+
+   void setDeck(vector<Card> tempDeck);
+
+private:
+   vector <Card> deck;
 };
