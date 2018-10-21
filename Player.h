@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 10/2/2018
+//* Date: 10/23/2018
 //****************************************************
 
 #pragma once
@@ -12,57 +12,59 @@
 class Player
 {
 public:
-   Player();
+   Player(string name);
    
    void addCardsToHand(Card card);
+   void addCardsToPile(Card card);
 
-   void playerCardsOnHand(string playerIdentifier);
-
-   void playerCardsOnPile(string playerIdentifier);
+   void printCardsOnHand();
+   void printCardsOnPile();
 
    vector<Card> getCardsOnPile() const;
-
    vector<Card> getCardsOnHand() const;
 
    void setCardsOnHand(vector<Card> cardSelected);
-
+   void setCardsOnPile(vector<Card> cardSelected);
    void makeNextMove();
 
    void setPlayerScore(int playerScore);
-
    int getPlayerScore() const;
-
    int getFirstBuildScore() const;
+   void setFirstBuildScore(int score);
+   string getPlayerName() const;
+   tuple<string, vector<Card>> getSingleBuild() const;
+   tuple<string, vector<vector<Card>>> getMultipleBuild() const;
 
    bool isCardOnHand(string cardSelected) const;
    bool isCardOnPile(string cardSelected) const;
    bool isCardOnTable(string cardSelected, vector<Card> cardsOnTable) const;
    bool isDigit(string temp) const;
+   bool isMultipleBuildExist() const;
+   bool isSingleBuildExist() const;
+   bool isCapturedCard() const;
 
    string getString(char x);
 
-   int cardScore(Card tempCard);
+   int calcSingleCardScore(Card tempCard);
    int calcLooseCardScore(vector<Card> looseCards);
 
-   bool makeSingleBuild(vector<Card>& tableCards);
+   virtual void play(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoBuild) = 0;
+   virtual bool makeSingleBuild(vector<Card>& tableCards) = 0;
+   virtual bool makeMultipleBuild(vector<Card>& tableCards) = 0;
+   virtual bool increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoBuild) = 0;
+   virtual void initiateMultipleBuild(vector<Card> &looseCardsSelected) = 0;
+   virtual bool captureCards(vector<Card>& tableCards) = 0;
+   virtual bool captureSetCards(vector<Card>& tableCards, Card& handSelCard) = 0;
+   virtual bool trailCard(vector<Card>& tableCards) = 0;
 
-   bool makeMultipleBuild(vector<Card>& tableCards);
+   void removeCardFromHand(Card& cardToRemove);
+   void removeCardsFromTable(vector<Card>& tableCards, vector<Card> looseCardsToRemove);
 
-   bool increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoBuild);
-
-   void initiateBuild(Card &handSelCard, vector<Card> &looseCardsSelected, int handCardScore);
-
-   void initiateMultipleBuild(vector<Card> &looseCardsSelected);
-
-   bool captureCards(vector<Card>& tableCards);
-
-   bool captureSetCards(vector<Card>& tableCards, Card& handSelCard);
-
-   void removeCardsOnHand(Card& cardToRemove);
-
-private:
+protected:
    int score;
    int firstBuildScore;
+   string playerName;
+   bool hasCapturedInCurMove;
    vector<Card> cardsOnPile;
    vector<Card> cardsOnHand;
    tuple<string, vector<Card>> singleBuildCard;

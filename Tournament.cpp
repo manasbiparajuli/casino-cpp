@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 10/2/2018
+//* Date: 10/23/2018
 //****************************************************
 
 #include "Tournament.h"
@@ -22,7 +22,9 @@ Tournament::Tournament()
    will have a coin toss that will determine who will go first. 
    A correct choice will let you go first, else computer plays first.)" << endl;
 
-   firstPlayer = 'H';
+   firstPlayer = "Human";
+   lastCapturer = "";
+   roundNumber = 1;
 
    startMenu();
 }
@@ -68,7 +70,7 @@ void Tournament::startMenu()
 // ****************************************************************
 void Tournament::createRounds()
 {
-
+   Round round(firstPlayer, "", roundNumber);
 }
 
 // ****************************************************************
@@ -108,12 +110,12 @@ void Tournament::tossCoin()
    if (toupper(choice) == tossedSide)
    {
       cout << "\nCorrect choice. You go first." << endl;
-      setFirstPlayer('H');
+      setFirstPlayer("Human");
    }
    else
    {
       cout << "\nWrong Choice. Computer goes first." << endl;
-      setFirstPlayer('C');
+      setFirstPlayer("Computer");
    }
 }
 
@@ -127,6 +129,7 @@ void Tournament::tossCoin()
 void Tournament::newGame()
 {
    tossCoin();
+   createRounds();
 }
 
 // ****************************************************************
@@ -138,48 +141,9 @@ void Tournament::newGame()
 // ****************************************************************
 void Tournament::loadGame()
 {
-   // get the text file to load from the player
-   string fileName = " ";
-
-   // flag for correct file read
-   bool fileRead = true;
-
-   do {
-      // get correct text file from the user
-      cout << "Enter the filename (eg. casino.txt) to load: " << endl;
-      getline(cin, fileName);
-
-      // stream object to read from a file
-      ifstream openFile(fileName.c_str());
-
-      // check if the file was able to be read
-      if (!openFile.is_open())
-      {
-         cerr << "Invalid text file read. Try Again." << endl;
-         fileRead = false;
-      }
-
-      // proceed to reading contents from the file if we were able to open the file
-      else
-      {
-         // the contents of a line from the text file
-         string line;
-
-         // the line number that the file pointer is pointing to when reading
-         int lineNumber = 0;
-
-         // start reading from the file
-         while (getline(openFile, line))
-         {
-            cout << line << endl;
-         }
-
-         // close reading the file
-         openFile.close();
-
-         fileRead = true;
-      }
-   } while (fileRead == false);
+   Round round(firstPlayer, lastCapturer, roundNumber);
+   round.loadGame();
+   round.gamePlay();
 }
 
 // ****************************************************************
@@ -190,7 +154,7 @@ void Tournament::loadGame()
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
-void Tournament::setFirstPlayer(char firstPlayer)
+void Tournament::setFirstPlayer(string firstPlayer)
 {
    this->firstPlayer = firstPlayer;
 }

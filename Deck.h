@@ -13,6 +13,8 @@ class Deck
 public:
 	Deck();
 
+   void createShuffledDeck();
+
 	void shuffleDeck();
 
 	Card dealCard();

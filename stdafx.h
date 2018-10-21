@@ -27,4 +27,6 @@
 #include <tuple>
 #include <utility>   // as_const()
 
+#include <map>
+
 using namespace std;

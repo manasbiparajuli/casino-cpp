@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 10/2/2018
+//* Date: 10/23/2018
 //****************************************************
 
 #pragma once
@@ -12,59 +12,73 @@
 #include "Human.h"
 #include "Computer.h"
 #include "Score.h"
+#include <sstream>
 
 class Round
 {   
 public:
-   Round();
+   Round(string next, string lastCap, int rnd) : 
+      nextPlayer(next), 
+      lastCapturer(lastCap), 
+      roundNumber(rnd) {};
 
    void startGame();
 
-   void printDeckConfigChoices();
-
-   void loadDeckFromFile();
-
-   void displayMainMenu();
-
-   string getNextPlayer();
+   void loadGame();
+   void setSavedPreferences(int lineNumber, string line);
+   vector<Card> makeCardFromFile(vector<string> cards);
+   void saveMultipleBuildToFile(ofstream &saveToFile, vector<vector<Card>> &multiBuild);
    
-   void dealCardsToPlayers();
+   void printDeckConfigChoices();
+   void loadDeckFromFile();
+   void displayMainMenu(int& turn);
+   void dealCardsToPlayers(bool newRound);
 
-   void cardsOnTable();
-
-   void printCardsOnHand();
-
-   void printCardsOnPile();
+   void gamePlay();
+   void makeMove(int& turn);
 
    void calculateScore();
-
    void printScore();
 
    void saveGame();
-
-   void makeMove();
-
-   void getHelp();
-
+   void saveBuildOwnerToFile(ofstream &saveToFile);
+   void saveTableCardsToFile(ofstream &saveToFile);
+   void saveSingleBuildToFile(ofstream &saveToFile, vector<Card> &singleBuild);
+   void saveMultipleBuildToFile(ofstream &saveToFile, vector<vector<Card>> &multiBuild);
+   void getHelp(int& turn);
    void quitGame();
 
    int getRoundNumber() const;
-
+   void setRoundNumber(int rnd);
+   string getLastCapturer() const;
+   void setLastCapturer(string capturer);
+   string getNextPlayer() const;
+   void setNextPlayer(string next);
    void setDeck(vector<Card> tempDeck);
 
-   void buildOption();
-
-   void captureCard();
-
    vector<Card>& getTableCards();
+   void setTableCards(vector<Card> cards);
+   string getString(char x);
+   bool isTableEmpty() const;
+
+   void removeCardsFromTable(vector<Card> cardsToRemove);
+
+   void printCardsOnTable();
+   void printCardsOnHand();
+   void printCardsOnPile();
 
 private:
-   int humanScore;
-   int computerScore;
    int roundNumber;
-   vector<Card> tableCards;
+   int numberOfPlayers;
+   int humanIndex;
+   int computerIndex;
 
+   string lastCapturer;
+   string nextPlayer;
+   bool isNewGame;
+
+   vector<Card> tableCards;
    Deck deck;
-   Human humanPlayerOne;
-   Computer computerPlayerTwo;
+
+   Player *players[2];
 };

@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 10/2/2018
+//* Date: 10/23/2018
 //****************************************************
 
 #include "Deck.h"
@@ -14,19 +14,22 @@
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
-Deck::Deck()
-{
-	const string faces[] = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "X", "J", "Q", "K" };
-	const string suits[] = { "C", "D", "H", "S" };
+Deck::Deck() {}
 
-	for (auto const &suit: suits)
-	{
+void Deck::createShuffledDeck()
+{
+   const string faces[] = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "X", "J", "Q", "K" };
+   const string suits[] = { "C", "D", "H", "S" };
+
+   for (auto const &suit : suits)
+   {
       for (auto const &face : faces)
       {
          // push the card into the deck
-         deck.push_back(Card (suit, face));
-		}
-	}
+         deck.push_back(Card(suit, face));
+      }
+   }
+   shuffleDeck();
 }
 
 // ****************************************************************
@@ -78,7 +81,6 @@ Card Deck::dealCard()
 // ****************************************************************
 void Deck::printDeck()
 {
-   cout << "helo" << endl;
    for (auto card : deck)
    {
       cout << card.cardToString() + " ";
@@ -119,5 +121,9 @@ vector<Card> Deck::getDeck()
 // ****************************************************************
 void Deck::setDeck(vector<Card> tempDeck)
 {
+   // reversed the card so that 1st card is placed at the end of the vector
+   // then we can use pop_back() function to deal the first card
+   reverse(tempDeck.begin(), tempDeck.end());
+
    deck = tempDeck;
 }
