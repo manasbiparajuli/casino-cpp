@@ -16,15 +16,13 @@
 // ****************************************************************
 Tournament::Tournament()
 {
-   cout << R"(
-   Welcome to Casino, a board game where your objective is to
-   score the most points by capturing cards.To begin the game, we 
-   will have a coin toss that will determine who will go first. 
-   A correct choice will let you go first, else computer plays first.)" << endl;
-
+   cout << "Welcome to Casino, a board game where your objective is to " << endl;
+   cout << "score the most points by capturing cards." << endl; 
    firstPlayer = "Human";
    lastCapturer = "";
    roundNumber = 1;
+   playerOneScore = 0;
+   playerTwoScore = 0;
 
    startMenu();
 }
@@ -59,18 +57,6 @@ void Tournament::startMenu()
 
    if (choice == 1) { newGame();}
    else { loadGame();}
-}
-
-// ****************************************************************
-// Function Name: createRounds()
-// Purpose: creates rounds for the game
-// Parameters: none
-// Return value: none
-// Assistance Received: none
-// ****************************************************************
-void Tournament::createRounds()
-{
-   Round round(firstPlayer, "", roundNumber);
 }
 
 // ****************************************************************
@@ -128,8 +114,47 @@ void Tournament::tossCoin()
 // ****************************************************************
 void Tournament::newGame()
 {
+   // get the round's players' names and their respective scores as pairs
+   vector<pair<string, int>> roundScores;
+
+   // flag that identies whether this is a new round or not
+   bool newRound = false;
+
+   cout << "\n**********************************" << endl;
+   cout << "To begin the game, we will have a coin toss that will determine who will go first." << endl;
+   cout << "A correct choice will let you go first, else computer plays first." << endl;
+   cout << "\n**********************************" << endl;
+
    tossCoin();
-   createRounds();
+
+   Round round(firstPlayer, lastCapturer, roundNumber);
+
+   // play the game until one of the players reach at least a score of 21 
+   do
+   {
+      // for subsequent rounds, the first player will be decided by the last capturer
+      if (newRound == true)
+      {
+         firstPlayer = "";
+         Round round(firstPlayer, lastCapturer, roundNumber);
+      }
+
+      round.gamePlay();
+      evaluateScores(roundScores, round);
+      lastCapturer = round.getLastCapturer();
+      roundNumber++;
+      newRound = true;
+
+      // display scores at the end of each round
+      cout << "\n**********************************" << endl;
+      cout << "Scores at end of round " << roundNumber << endl;
+      cout << firstPlayerName << ": " << playerOneScore << endl;
+      cout << secondPlayerName << ": " << playerTwoScore << endl;
+      cout << "\n**********************************" << endl;
+
+   } while (!(playerOneScore >= 21 || playerTwoScore >= 21));
+
+   displayTourneyResult();
 }
 
 // ****************************************************************
@@ -141,9 +166,65 @@ void Tournament::newGame()
 // ****************************************************************
 void Tournament::loadGame()
 {
+   // get the round's players' names and their respective scores as pairs
+   vector<pair<string, int>> roundScores;
+
+   // flag that identies whether this is a new round or not
+   bool newRound = false;
+
    Round round(firstPlayer, lastCapturer, roundNumber);
    round.loadGame();
-   round.gamePlay();
+   roundNumber = round.getRoundNumber();
+   evaluateScores(roundScores, round);
+
+   do
+   {
+      // for subsequent rounds, the first player will be decided by the last capturer
+      if (newRound == true)
+      {
+         firstPlayer = "";
+         Round round(firstPlayer, lastCapturer, roundNumber);
+      }
+
+      round.gamePlay();
+      evaluateScores(roundScores, round);
+      lastCapturer = round.getLastCapturer();
+      roundNumber++;
+      newRound = true;
+
+      // display scores at the end of each round
+      cout << "SCORES: " << endl;
+      cout << firstPlayerName << ": " << playerOneScore << endl;
+      cout << secondPlayerName << ": " << playerTwoScore << endl;
+
+   } while (!(playerOneScore >= 21 || playerTwoScore >= 21 ));
+
+   displayTourneyResult();
+}
+
+void Tournament::evaluateScores(vector<pair<string, int>> &roundScores, Round &round)
+{
+   // get the pair of players and scores from the round
+   roundScores = round.sendRndScoreToTourney();
+
+   // store the players' names and scores
+   for (auto players : roundScores)
+   {
+      // keep track of the number of players so that we store the correct score for them
+      int count = 0;
+
+      if (count == 0)
+      {
+         firstPlayerName = players.first;
+         playerOneScore += players.second;
+      }
+      else if (count == 1)
+      {
+         secondPlayerName = players.first;
+         playerTwoScore += players.second;
+      }
+      count++;
+   }
 }
 
 // ****************************************************************
@@ -157,4 +238,27 @@ void Tournament::loadGame()
 void Tournament::setFirstPlayer(string firstPlayer)
 {
    this->firstPlayer = firstPlayer;
+}
+
+void Tournament::displayTourneyResult()
+{
+   cout << "\n*******************************************" << endl;
+   cout << "SCORES: " << endl;
+   cout << firstPlayerName << ": " << playerOneScore << endl;
+   cout << secondPlayerName << ": " << playerTwoScore << endl;
+
+   if (playerOneScore > playerTwoScore)
+   {
+      cout << firstPlayerName << " wins!!" << endl;
+   }
+   else if (playerTwoScore > playerOneScore)
+   {
+      cout << secondPlayerName << " wins!!" << endl;
+   }
+   else
+   {
+      cout << "It's a tie!!" << endl;
+   }
+   cout << "Thank You for Playing!" << endl;
+   cout << "\n*******************************************" << endl;
 }

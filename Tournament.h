@@ -15,19 +15,21 @@ public:
    Tournament();
 
    void startMenu();
-
-   void createRounds();
-
    void tossCoin();
-
    void newGame();
-
    void loadGame();
-
+   void evaluateScores(std::vector<std::pair<std::string, int>> &roundScores, Round &round);
    void setFirstPlayer(string firstPlayer);
+   void displayTourneyResult();
 
 private:
+   int roundNumber;
+   int playerOneScore;
+   int playerTwoScore;
+
    string firstPlayer;
    string lastCapturer;
-   int roundNumber;
+
+   string firstPlayerName;
+   string secondPlayerName;
 };

@@ -17,17 +17,15 @@
 class Round
 {   
 public:
-   Round(string next, string lastCap, int rnd) : 
-      nextPlayer(next), 
-      lastCapturer(lastCap), 
-      roundNumber(rnd) {};
+   Round(string next, string lastCap, int rnd);
+
+   void createPlayers();
 
    void startGame();
 
    void loadGame();
    void setSavedPreferences(int lineNumber, string line);
    vector<Card> makeCardFromFile(vector<string> cards);
-   void saveMultipleBuildToFile(ofstream &saveToFile, vector<vector<Card>> &multiBuild);
    
    void printDeckConfigChoices();
    void loadDeckFromFile();
@@ -38,6 +36,7 @@ public:
    void makeMove(int& turn);
 
    void calculateScore();
+   vector<pair<string, int>> sendRndScoreToTourney();
    void printScore();
 
    void saveGame();
@@ -63,9 +62,12 @@ public:
 
    void removeCardsFromTable(vector<Card> cardsToRemove);
 
+   void displayRoundStatus();
    void printCardsOnTable();
    void printCardsOnHand();
    void printCardsOnPile();
+
+   void test() {};
 
 private:
    int roundNumber;

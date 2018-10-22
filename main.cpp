@@ -12,14 +12,6 @@ int main()
 {
    //Tournament tournament;
 
-   Round round;
-   //round.loadGame();
-   ////round.printDeckConfigChoices();
-   round.startGame();
-   round.printCardsOnHand();
-
-   round.buildOption();
-
    system("pause");
 	return 0;
 }

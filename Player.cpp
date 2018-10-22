@@ -75,6 +75,46 @@ void Player::printCardsOnPile()
    cout << endl;
 }
 
+void Player::printSingleBuild()
+{
+   vector<Card> build;
+   tie(ignore, build) = singleBuildCard;
+   
+   if (isSingleBuildExist() == true)
+   {
+      cout << " [";
+      for (auto cards : build)
+      {
+         cout << cards.cardToString() << " ";
+      }
+      cout << "]";
+      cout << endl;
+   }
+}
+
+void Player::printMultipleBuild()
+{
+   vector<vector<Card>> multiBuild;
+   tie(ignore, multiBuild) = multipleBuildCard;
+
+   if (isMultipleBuildExist() == true)
+   {
+      cout << " [ ";
+
+      for (auto builds : multiBuild)
+      {
+         cout << "[";
+
+         for (auto cards : builds)
+         {
+            cout << cards.cardToString() << " ";
+         }
+         cout << "]";
+      }
+      cout << " ]";
+   }
+}
+
 // ****************************************************************
 // Function Name: getCardsOnPile
 // Purpose: gets the current cards on the player's pile
@@ -107,17 +147,6 @@ void Player::setCardsOnHand(vector<Card> cardSelected)
 void Player::setCardsOnPile(vector<Card> cardSelected)
 {
    cardsOnPile = cardSelected;
-}
-
-// ****************************************************************
-// Function Name: makeNextMove
-// Purpose: makes the next move in the game
-// Parameter: none
-// Return value: none
-// Assistance Received: none
-// ****************************************************************
-void Player::makeNextMove()
-{
 }
 
 // ****************************************************************
@@ -261,7 +290,7 @@ bool Player::isSingleBuildExist() const
    return false;
 }
 
-bool Player::isCapturedCard() const
+bool Player::hasCapturedCard() const
 {
    return hasCapturedInCurMove;
 }
@@ -323,4 +352,19 @@ void Player::removeCardsFromTable(vector<Card>& tableCards, vector<Card> looseCa
    {
       tableCards.erase(remove(tableCards.begin(), tableCards.end(), builtCards), tableCards.end());
    }
+}
+
+Card Player::findCommonCard(const vector<Card>& matchedTableCards)
+{
+   // loop through the cards in the player's hand to check if any card
+   // is contained in one of the built table cards
+   for (auto handCard : getCardsOnHand())
+   {
+      // return the card if found
+      if (find(matchedTableCards.begin(), matchedTableCards.end(), handCard) != matchedTableCards.end())
+      {
+         return handCard;
+      }
+   }
+   return Card();
 }

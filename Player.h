@@ -19,13 +19,14 @@ public:
 
    void printCardsOnHand();
    void printCardsOnPile();
+   void printSingleBuild();
+   void printMultipleBuild();
 
    vector<Card> getCardsOnPile() const;
    vector<Card> getCardsOnHand() const;
 
    void setCardsOnHand(vector<Card> cardSelected);
    void setCardsOnPile(vector<Card> cardSelected);
-   void makeNextMove();
 
    void setPlayerScore(int playerScore);
    int getPlayerScore() const;
@@ -41,7 +42,7 @@ public:
    bool isDigit(string temp) const;
    bool isMultipleBuildExist() const;
    bool isSingleBuildExist() const;
-   bool isCapturedCard() const;
+   bool hasCapturedCard() const;
 
    string getString(char x);
 
@@ -59,6 +60,8 @@ public:
 
    void removeCardFromHand(Card& cardToRemove);
    void removeCardsFromTable(vector<Card>& tableCards, vector<Card> looseCardsToRemove);
+   Card findCommonCard(const vector<Card>& matchedTableCards);
+
 
 protected:
    int score;

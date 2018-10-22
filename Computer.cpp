@@ -22,19 +22,44 @@ void Computer::play(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoB
    // Make moves respectively. Return from the function if successful as a player can only make one move.
 
    moveSuccess = increaseOpponentBuild(tableCards, oppoBuild);
-   if (moveSuccess == true) { hasCapturedInCurMove = false; return; }
+   if (moveSuccess == true) 
+   { 
+      cout << "Increased Opponent's Build" << endl;
+      hasCapturedInCurMove = false; 
+      return; 
+   }
 
    moveSuccess = makeMultipleBuild(tableCards);
-   if (moveSuccess == true) { hasCapturedInCurMove = false; return; }
+   if (moveSuccess == true) 
+   { 
+      cout << "Multiple Build Successful" << endl;
+      hasCapturedInCurMove = false; 
+      return; 
+   }
 
    moveSuccess = makeSingleBuild(tableCards);
-   if (moveSuccess == true) { hasCapturedInCurMove = false; return; }
+   if (moveSuccess == true) 
+   { 
+      cout << "Single Build Successful" << endl;
+      hasCapturedInCurMove = false; 
+      return; 
+   }
 
    moveSuccess = captureCards(tableCards);
-   if (moveSuccess == true) { hasCapturedInCurMove = true; return; }
+   if (moveSuccess == true) 
+   { 
+      cout << "Cards captured" << endl;
+      hasCapturedInCurMove = true; 
+      return; 
+   }
 
    moveSuccess = trailCard(tableCards);
-   if (moveSuccess == true) { hasCapturedInCurMove = false; return; }
+   if (moveSuccess == true) 
+   { 
+      cout << "Card trailed" << endl;
+      hasCapturedInCurMove = false; 
+      return; 
+   }
 }
 
 bool Computer::makeSingleBuild(vector<Card>& tableCards)
@@ -89,7 +114,11 @@ bool Computer::makeSingleBuild(vector<Card>& tableCards)
    if (singleBuildPossible) 
    { 
       singleBuildCard = make_tuple(getPlayerName(), matchedTableCards);
-      
+
+      // remove card that made up build successfully from the player's hand
+      Card cardToRemove = findCommonCard(matchedTableCards);
+      removeCardFromHand(cardToRemove);
+
       // remove cards that made up build successfully from the table
       removeCardsFromTable(tableCards, matchedTableCards);
 
@@ -112,7 +141,7 @@ bool Computer::makeMultipleBuild(vector<Card>& tableCards)
    bool multipleBuildPossible = false;
 
    // the valid build cards used to make a multiple build
-   vector<Card> matchedTableCards;
+   vector<Card> matchedTableCards = {};
 
    // player cannot make a multibuild if there are less than two cards in their hand
    if (getCardsOnHand().size() < 2) { return false; }
@@ -142,56 +171,88 @@ bool Computer::makeMultipleBuild(vector<Card>& tableCards)
    // We now repeat the steps that we took to build a single build
    //////////
 
-   // Temporarily add a card to table to check if a build is possible
-   for (auto handCardToBuildWith : getCardsOnHand())
+   // If there are no cards on the table, then we check if there are two hand cards equal the score
+   // of the previous single build score. We need two cards because one card will be used to build a multibuild
+   // while the other card will be used to capture the multiple build in the player's next turn
+   if (tableCards.size() == 0)
    {
-      // add card from hand temporarily to check if computer can make a build using this card
-      tableCards.push_back(handCardToBuildWith);
+      // store the number of cards with the same score as the previous build score
+      int sameCardScoreCount = 0;
 
-      // enlist the possible power sets based on tableSize
-      vector<string> buildComb = score.powerSet(static_cast<int> (tableCards.size()));
-
-      // make a map of the scores possible from valid builds
-      score.buildScoreMap(buildComb, tableCards);
-
-      // get the map of <BuildScores, BuildCombination>
-      auto map = score.getBuildComb();
-
-      // Loop through the hand cards to check if a card score equivalent to 
-      // previous build score matches a key in map
-      for (auto handCard : getCardsOnHand())
+      // loop through the cards in the player's hand
+      for (auto handCardToBuildWith : getCardsOnHand())
       {
-         // calculate the hand card score for each card
-         int handCardScore = calcSingleCardScore(handCard);
-
-         // only traverse through map if the hand card score is equal to the previous build score
-         if (handCardScore == previousBuildScore)
+         if (calcSingleCardScore(handCardToBuildWith) == previousBuildScore)
          {
-            // iterate through the map and check if the key matches the handCardScore
-            for (auto itr = map.begin(); itr != map.end(); itr++)
+            sameCardScoreCount++;
+
+            // we have cards with the same score. So, we can make a multiple build
+            if (sameCardScoreCount >= 2)
             {
-               // match found
-               if (itr->first == handCardScore)
-               {
-                  multipleBuildPossible = true;
-                  matchedTableCards = itr->second;
-               }
+               matchedTableCards.push_back(handCardToBuildWith);
+               multipleBuildPossible = true;
             }
          }
       }
-      // remove the card from the table that we temporarily added to get possible build combinations
-      tableCards.erase(remove(tableCards.begin(), tableCards.end(), handCardToBuildWith), tableCards.end());
    }
+
+   else
+   {
+      // Temporarily add a card to table to check if a build is possible
+      for (auto handCardToBuildWith : getCardsOnHand())
+      {
+         // add card from hand temporarily to check if computer can make a build using this card
+         tableCards.push_back(handCardToBuildWith);
+
+         // enlist the possible power sets based on tableSize
+         vector<string> buildComb = score.powerSet(static_cast<int> (tableCards.size()));
+
+         // make a map of the scores possible from valid builds
+         score.buildScoreMap(buildComb, tableCards);
+
+         // get the map of <BuildScores, BuildCombination>
+         auto map = score.getBuildComb();
+
+         // Loop through the hand cards to check if a card score equivalent to 
+         // previous build score matches a key in map
+         for (auto handCard : getCardsOnHand())
+         {
+            // calculate the hand card score for each card
+            int handCardScore = calcSingleCardScore(handCard);
+
+            // only traverse through map if the hand card score is equal to the previous build score
+            if (handCardScore == previousBuildScore)
+            {
+               // iterate through the map and check if the key matches the handCardScore
+               for (auto itr = map.begin(); itr != map.end(); itr++)
+               {
+                  // match found
+                  if (itr->first == handCardScore)
+                  {
+                     multipleBuildPossible = true;
+                     matchedTableCards = itr->second;
+                  }
+               }
+            }
+         }
+         // remove the card from the table that we temporarily added to get possible build combinations
+         tableCards.erase(remove(tableCards.begin(), tableCards.end(), handCardToBuildWith), tableCards.end());
+      }
+   }
+
 
    // Since hand card score matched the key in map at least once, we return true
    if (multipleBuildPossible)
    {
+      // remove card that made up build successfully from the player's hand
+      Card cardToRemove = findCommonCard(matchedTableCards);
+      removeCardFromHand(cardToRemove);
+
       initiateMultipleBuild(matchedTableCards);
 
       // remove cards that made up build successfully from the table
       removeCardsFromTable(tableCards, matchedTableCards);
 
-      cout << "Computer's multiple build successful" << endl;
       return true; 
    }
    return false;
@@ -284,8 +345,9 @@ bool Computer::captureCards(vector<Card>& tableCards)
       {
          // capture multiple builds, if there exist a matching card in the player's hand
          if (isMultipleBuildExist() == true)
-         {
-            // store the multiple builds
+         {            
+            // store the single and multiple builds
+            vector<Card> singleBuild;
             vector<vector<Card>> multipleBuild;
 
             // unpack the tuple to get a list of Cards in the multiple build
@@ -300,9 +362,17 @@ bool Computer::captureCards(vector<Card>& tableCards)
                   cardsOnPile.push_back(buildCards);
                }
             }
-            // push the hand card into the player's pile and remove it from player's hand
-            cardsOnPile.push_back(handCard);
+
+            // empty the multibuild as we have captured these cards
+            // Also, we need to empty the single build as multiple build has already captured those cards
+            multipleBuild = {};
+            singleBuild = {};
+            multipleBuildCard = make_tuple("", multipleBuild);
+            singleBuildCard = make_tuple("", singleBuild);
+
+            // remove card that was used to capture the build successfully from the player's hand and add to pile
             removeCardFromHand(handCard);
+            cardsOnPile.push_back(handCard);
             return true;
          }
          // capture single build
@@ -311,7 +381,7 @@ bool Computer::captureCards(vector<Card>& tableCards)
             // store the single build
             vector<Card> singleBuild;
 
-            // unpack te tuple to get the single build
+            // unpack the tuple to get the single build
             tie(ignore, singleBuild) = singleBuildCard;
 
             // push the cards in the single build into the player's pile
@@ -319,25 +389,30 @@ bool Computer::captureCards(vector<Card>& tableCards)
             {
                cardsOnPile.push_back(buildCards);
             }
+
+            // empty the single build as we have captured these cards
+            singleBuild = {};
+            singleBuildCard = make_tuple("", singleBuild);
+
             // push the hand card into the player's pile and remove it from player's hand
             cardsOnPile.push_back(handCard);
             removeCardFromHand(handCard);
             return true;
          }
       }
+   }
 
-      // Since there are no cards on hand that matches the score of the builds, we move
-      // to capture set of cards or loose cards from the table
-      else
+   // Since there are no cards on hand that matches the score of the builds, we move
+   // to capture set of cards or loose cards from the table
+   for (auto handCard : getCardsOnHand())
+   {
+      // flag that sets if capturing set of cards was possible
+      bool captureSetSuccess = captureSetCards(tableCards, handCard);
+
+      // if we captured set of cards, then return true from the function
+      if (captureSetSuccess == true)
       {
-         // flag that sets if capturing set of cards was possible
-         bool captureSetSuccess = captureSetCards(tableCards, handCard);
-        
-         // if we captured set of cards, then return true from the function
-         if (captureSetSuccess) 
-         { 
-            return true; 
-         }
+         return true;
       }
    }
    // not possible to capture any cards from builds or as set of cards
@@ -389,6 +464,7 @@ bool Computer::captureSetCards(vector<Card>& tableCards, Card & handSelCard)
       if (calcSingleCardScore(tableCard) == handCardScore)
       {
          cardsOnPile.push_back(tableCard);
+         cardsOnPile.push_back(handSelCard);
          matchedTableCards.push_back(tableCard);
          setPossible = true;
       }
@@ -412,11 +488,12 @@ bool Computer::captureSetCards(vector<Card>& tableCards, Card & handSelCard)
 bool Computer::trailCard(vector<Card>& tableCards)
 {
    // store the size of the table cards
-   int sizeOfTable = static_cast<int> (tableCards.size());
+   int sizeOfHandCards = static_cast<int> (getCardsOnHand().size());
 
    // Cannot trail if there exists a build owned by the player
    if (isSingleBuildExist() == true || isMultipleBuildExist() == true)
    {
+      cout << "Invalid move to trail. Builds exist. " << endl;
       return false;
    }
 
@@ -426,9 +503,9 @@ bool Computer::trailCard(vector<Card>& tableCards)
 
    // random number generator
    auto rng = default_random_engine(seed);
-   uniform_int_distribution<> generate(0, sizeOfTable - 1);
+   uniform_int_distribution<> generate(0, sizeOfHandCards - 1);
 
-   // generate random number between 0 and (size of table - 1 ) 
+   // generate random number between 0 and (size of hand cards - 1 ) 
    // treat the generated number as the index from which we select the card to trail
    int randomTableIndex = generate(rng);
 

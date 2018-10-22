@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 10/16/2018
+//* Date: 10/23/2018
 //****************************************************
 
 #include "Round.h"
@@ -22,6 +22,11 @@ Round::Round(string next, string lastCap,  int rnd = 1) :
    numberOfPlayers = 2;
    isNewGame = false;
 
+   createPlayers();
+}
+
+void Round::createPlayers()
+{
    if (nextPlayer == "Human")
    {
       humanIndex = 0;
@@ -210,7 +215,11 @@ void Round::setSavedPreferences(int lineNumber, string line)
    {
       while (str >> token)
       {
-         if (token != "Next" || token != "Player:") { setNextPlayer(token); }
+         if (token != "Next" || token != "Player:") 
+         { 
+            setNextPlayer(token); 
+            createPlayers();
+         }
       }
    }
 }
@@ -218,6 +227,9 @@ void Round::setSavedPreferences(int lineNumber, string line)
 vector<Card> Round::makeCardFromFile(vector<string> cards)
 {
    vector<Card> cardList = {};
+   
+   // Loop through the string and make it a card object
+   // Then return cards as vector of cards
    for (auto cardStr : cards)
    {
       Card tempCard(getString(cardStr[0]), getString(cardStr[1]));
@@ -430,7 +442,7 @@ void Round::dealCardsToPlayers(bool newRound)
 
 void Round::gamePlay()
 {
-   // store the turns in the current round to alternate between player turns
+   // store the turns in the current round to alternate between players
    int turns = 0;
    
    do
@@ -446,7 +458,7 @@ void Round::gamePlay()
          isNewGame = false;
       }
 
-      // Deal cards to players if both of their hands are empty and deck is not empty
+      // Deal cards only to players if both of their hands are empty and deck is not empty
       if (pl1Hand <= 0 && pl2Hand <= 0 && deck.isDeckEmpty() == false)
       {
          dealCardsToPlayers(false);
@@ -472,6 +484,9 @@ void Round::gamePlay()
          }
          break;
       }
+
+      // Display ongoing cards status
+      displayRoundStatus();
 
       // Display options for the player before every turn
       displayMainMenu(turns);
@@ -499,7 +514,7 @@ void Round::makeMove(int& turn)
       players[turnIndex]->play(getTableCards(), oppoBuild);
 
       // set the last capturer to this player if any capturing of cards was done in this move
-      if (players[turnIndex]->isCapturedCard() == true)
+      if (players[turnIndex]->hasCapturedCard() == true)
       {
          lastCapturer = players[turnIndex]->getPlayerName();
       }
@@ -508,7 +523,7 @@ void Round::makeMove(int& turn)
       turn++;
    }
    // Second Player's turn
-   else
+   else if (turnIndex == 1)
    {
       // get the single build of the opponent
       oppoBuild = players[turnIndex - 1]->getSingleBuild();
@@ -517,7 +532,7 @@ void Round::makeMove(int& turn)
       players[turnIndex]->play(getTableCards(), oppoBuild);
 
       // set the last capturer to this player if any capturing of cards was done in this move
-      if (players[turnIndex]->isCapturedCard() == true)
+      if (players[turnIndex]->hasCapturedCard() == true)
       {
          lastCapturer = players[turnIndex]->getPlayerName();
       }
@@ -549,6 +564,18 @@ void Round::calculateScore()
 
    players[humanIndex]->setPlayerScore(humanScore);
    players[computerIndex]->setPlayerScore(computerScore);
+}
+
+vector<pair<string, int>> Round::sendRndScoreToTourney()
+{
+   vector<pair<string, int>> scores = {};
+
+   // return the players' name and score as pair
+   for (int i = 0; i < numberOfPlayers; i++)
+   {
+      scores.push_back(make_pair(players[i]->getPlayerName(), players[i]->getPlayerScore()));
+   }
+   return scores;
 }
 
 // ****************************************************************
@@ -856,6 +883,19 @@ void Round::removeCardsFromTable(vector<Card> cardsToRemove)
    }
 }
 
+void Round::displayRoundStatus()
+{
+   cout << "**********************************" << endl;
+   cout << "**********************************" << endl;
+   printCardsOnTable();
+   cout << "**********************************" << endl;
+   printCardsOnHand();
+   cout << "**********************************" << endl;
+   printCardsOnPile();
+   cout << "**********************************" << endl;
+   cout << "**********************************" << endl;
+}
+
 // ****************************************************************
 // Function Name: cardsOnTable
 // Purpose: prints the current cards on the table
@@ -866,6 +906,15 @@ void Round::removeCardsFromTable(vector<Card> cardsToRemove)
 void Round::printCardsOnTable()
 {
    cout << "Cards on table are: ";
+
+   // Print the builds of the players first
+   for (int i = 0; i < numberOfPlayers; i++)
+   {
+      players[i]->printMultipleBuild();
+      players[i]->printSingleBuild();
+   }
+
+   // Print the tablecards
    for (auto card : tableCards)
    {
       cout << card.cardToString() + " ";
@@ -884,11 +933,8 @@ void Round::printCardsOnHand()
 {
    for (int i = 0; i < numberOfPlayers; i++)
    {
-      string playerName = players[i]->getPlayerName();
-      cout << playerName;
       players[i]->printCardsOnHand();
    }
-   printCardsOnTable();
 }
 
 // ****************************************************************
@@ -902,8 +948,6 @@ void Round::printCardsOnPile()
 {
    for (int i = 0; i < numberOfPlayers; i++)
    {
-      string playerName = players[i]->getPlayerName();
-      cout << playerName;
       players[i]->printCardsOnPile();
    }
 }

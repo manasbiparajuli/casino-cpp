@@ -411,5 +411,43 @@ bool Human::captureSetCards(vector<Card>& tableCards, Card& handSelCard)
 
 bool Human::trailCard(vector<Card>& tableCards)
 {
-   return false;
+   string cardSelectHand;
+   int handCardScore = 0;
+
+   // Warn the human player that trailing is not possible when they own a build
+   if (isSingleBuildExist() == true || isMultipleBuildExist() == true)
+   {
+      cout << "Invalid. Cannot trail when you have builds. Capture the build instead?" << endl;
+      return false;
+   }
+
+   cout << "\nFrom your hand, enter the card (eg. S3) that you want to trail: ";
+   do
+   {
+      cin >> cardSelectHand;
+   } while (!(isCardOnHand(cardSelectHand)));
+   
+   // convert the string into a Card object
+   Card trailCard(getString(cardSelectHand[0]), getString(cardSelectHand[1]));
+   handCardScore = calcSingleCardScore(trailCard);
+
+   // Check whether there are any loose cards on the table that the user has not captured
+   if (tableCards.size() > 0)
+   {
+      for (auto tblCard : tableCards)
+      {
+         if (handCardScore == calcSingleCardScore(tblCard))
+         {
+            cout << "Invalid. Cannot trail when you have a matching loose card in the table. Try capturing instead?" << endl;
+            return false;
+         }
+      }
+   }
+
+   // add the selected card to trail on the table and then remove from the player's hand
+   tableCards.push_back(trailCard);
+   removeCardFromHand(trailCard);
+
+   // Human trailed the card successsfully
+   return true;
 }
