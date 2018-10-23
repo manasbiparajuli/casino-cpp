@@ -256,3 +256,7 @@ void Score::printBuildMap(multimap<int, vector<Card>> map)
       cout << endl;
    }
 }
+
+Score::~Score()
+{
+}

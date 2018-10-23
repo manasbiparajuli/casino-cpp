@@ -18,9 +18,13 @@ public:
    bool makeSingleBuild(vector<Card>& tableCards);
    bool makeMultipleBuild(vector<Card>& tableCards);
    bool increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoBuild);
-   void initiateBuild(Card &handSelCard, vector<Card> &looseCardsSelected, int handCardScore);
+   void initiateBuild(vector<Card> &looseCardsSelected, int handCardScore);
    void initiateMultipleBuild(vector<Card> &looseCardsSelected);
    bool captureCards(vector<Card>& tableCards);
-   bool captureSetCards(vector<Card>& tableCards, Card& handSelCard);
+   bool captureSingleBuild(int handCardScore, Card &selectedHandCard);
+   bool captureMultipleBuild(int handCardScore, Card &selectedHandCard);
+   bool captureSetCards(vector<Card>& tableCards, Card& selectedHandCard);
    bool trailCard(vector<Card>& tableCards);
+
+   ~Human();
 };

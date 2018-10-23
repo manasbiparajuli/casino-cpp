@@ -34,6 +34,7 @@ public:
    void setFirstBuildScore(int score);
    string getPlayerName() const;
    tuple<string, vector<Card>> getSingleBuild() const;
+   void setSingleBuild(tuple<string, vector<Card>> build);
    tuple<string, vector<vector<Card>>> getMultipleBuild() const;
 
    bool isCardOnHand(string cardSelected) const;
@@ -62,6 +63,7 @@ public:
    void removeCardsFromTable(vector<Card>& tableCards, vector<Card> looseCardsToRemove);
    Card findCommonCard(const vector<Card>& matchedTableCards);
 
+   ~Player();
 
 protected:
    int score;

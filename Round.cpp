@@ -509,9 +509,12 @@ void Round::makeMove(int& turn)
    {
       // get the single build of the opponent
       oppoBuild = players[turnIndex + 1]->getSingleBuild();
-      
+    
       // let the player make a move
       players[turnIndex]->play(getTableCards(), oppoBuild);
+
+      // set the opponent's build if their build has been modified
+      players[turnIndex + 1]->setSingleBuild(oppoBuild);
 
       // set the last capturer to this player if any capturing of cards was done in this move
       if (players[turnIndex]->hasCapturedCard() == true)
@@ -530,6 +533,9 @@ void Round::makeMove(int& turn)
 
       // let the player make a move
       players[turnIndex]->play(getTableCards(), oppoBuild);
+
+      // set the opponent's build if their build has been modified
+      players[turnIndex - 1]->setSingleBuild(oppoBuild);
 
       // set the last capturer to this player if any capturing of cards was done in this move
       if (players[turnIndex]->hasCapturedCard() == true)
@@ -605,7 +611,7 @@ void Round::printScore()
 void Round::saveGame()
 {
    // file stream object to save contents to a file in the current directory
-   ofstream saveToFile("casino.txt");
+   ofstream saveToFile("casinosave.txt");
 
    // validates if there was any error opening the file
    // if the validation fails, the program aborts
@@ -950,4 +956,8 @@ void Round::printCardsOnPile()
    {
       players[i]->printCardsOnPile();
    }
+}
+
+Round::~Round()
+{
 }

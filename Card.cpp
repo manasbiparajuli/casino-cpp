@@ -77,6 +77,10 @@ string Card::cardToString() const
    return suitValue + faceValue;
 }
 
+Card::~Card()
+{
+}
+
 bool operator==(const Card & card1, const Card & card2)
 {
    if (card1.cardToString() == card2.cardToString())

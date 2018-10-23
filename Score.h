@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 10/16/2018
+//* Date: 10/23/2018
 //****************************************************
 
 #pragma once
@@ -33,8 +33,9 @@ public:
 
    vector <string> powerSet(int tableSize);
    void buildScoreMap(vector<string>& powerSets, const vector<Card>& tableCards);
-
    void printBuildMap(multimap<int, vector<Card>> map);
+
+   ~Score();
 
 private:
    int playerOneScore;

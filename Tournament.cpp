@@ -23,8 +23,6 @@ Tournament::Tournament()
    roundNumber = 1;
    playerOneScore = 0;
    playerTwoScore = 0;
-
-   startMenu();
 }
 
 // ****************************************************************
@@ -261,4 +259,8 @@ void Tournament::displayTourneyResult()
    }
    cout << "Thank You for Playing!" << endl;
    cout << "\n*******************************************" << endl;
+}
+
+Tournament::~Tournament()
+{
 }

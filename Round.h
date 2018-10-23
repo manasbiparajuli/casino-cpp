@@ -67,6 +67,8 @@ public:
    void printCardsOnHand();
    void printCardsOnPile();
 
+   ~Round();
+
    void test() {};
 
 private:

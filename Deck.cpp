@@ -127,3 +127,7 @@ void Deck::setDeck(vector<Card> tempDeck)
 
    deck = tempDeck;
 }
+
+Deck::~Deck()
+{
+}

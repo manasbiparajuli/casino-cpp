@@ -20,6 +20,7 @@ void Computer::play(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoB
    bool moveSuccess = false;
 
    // Make moves respectively. Return from the function if successful as a player can only make one move.
+   cout << "\n******************************************************************************" << endl;
 
    moveSuccess = increaseOpponentBuild(tableCards, oppoBuild);
    if (moveSuccess == true) 
@@ -117,12 +118,17 @@ bool Computer::makeSingleBuild(vector<Card>& tableCards)
 
       // remove card that made up build successfully from the player's hand
       Card cardToRemove = findCommonCard(matchedTableCards);
+
+      // Explain move reasoning
+      cout << getPlayerName() << " played " << cardToRemove.cardToString() << " to create a single build of ";
+      for (auto cards : matchedTableCards)
+      {
+         cout << cards.cardToString() << " ";
+      }
       removeCardFromHand(cardToRemove);
 
       // remove cards that made up build successfully from the table
       removeCardsFromTable(tableCards, matchedTableCards);
-
-      cout << "Computer's single build successful" << endl;
       return true; 
    }
    // no matching keys found
@@ -240,19 +246,25 @@ bool Computer::makeMultipleBuild(vector<Card>& tableCards)
       }
    }
 
-
    // Since hand card score matched the key in map at least once, we return true
    if (multipleBuildPossible)
    {
       // remove card that made up build successfully from the player's hand
       Card cardToRemove = findCommonCard(matchedTableCards);
-      removeCardFromHand(cardToRemove);
+      
+      // Explain move reasoning
+      cout << getPlayerName() << " played " << cardToRemove.cardToString() << " to create a multiple build of ";
+      for (auto cards : matchedTableCards)
+      {
+         cout << cards.cardToString() << " ";
+      }
+      cout << ". It wanted to increase the number of builds " << endl;
 
+      removeCardFromHand(cardToRemove);
       initiateMultipleBuild(matchedTableCards);
 
       // remove cards that made up build successfully from the table
       removeCardsFromTable(tableCards, matchedTableCards);
-
       return true; 
    }
    return false;
@@ -272,7 +284,7 @@ bool Computer::increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vec
    // return false if the build is not owned by the player or if the opponent's build is empty
    if (owner == getPlayerName() || (oppnBuildCard.size() == 0))
    {
-      cout << "Computer cannot increment its own build!" << endl;
+      cout << getPlayerName() << " cannot increment its own build!" << endl;
       return false;
    }
 
@@ -298,7 +310,10 @@ bool Computer::increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vec
             oppoBuild = make_tuple("", empty);
             removeCardFromHand(handCardToIncrease);
 
-            cout << "Computer has increased the build of its opponent." << endl;
+            // Explain move reasoning
+            cout << getPlayerName() << " played " << handCardToIncrease.cardToString() << " to increase opponent's build." << endl;
+            cout << "It wanted to own the build of the opponent and thus dent their chances of capturing that build." << endl;
+
             return true;
          }
       }
@@ -330,8 +345,6 @@ void Computer::initiateMultipleBuild(vector<Card>& looseCardsSelected)
 
    // create a tuple for the multiple build
    multipleBuildCard = make_tuple(owner, multipleBuild);
-
-   cout << "Computer's multibuild successful" << endl;
 }
 
 bool Computer::captureCards(vector<Card>& tableCards)
@@ -353,6 +366,9 @@ bool Computer::captureCards(vector<Card>& tableCards)
             // unpack the tuple to get a list of Cards in the multiple build
             tie(ignore, multipleBuild) = multipleBuildCard;
 
+            // Explain move reasoning
+            cout << getPlayerName() << " played " << handCard.cardToString() << " to capture a multiple build of " << endl;
+
             // loop through the builds stored in the multibuild
             for (auto parsedBuild : multipleBuild)
             {
@@ -360,8 +376,10 @@ bool Computer::captureCards(vector<Card>& tableCards)
                for (auto buildCards : parsedBuild)
                {
                   cardsOnPile.push_back(buildCards);
+                  cout << buildCards.cardToString() << " ";
                }
             }
+            cout << ". It wanted to maximize the number of captured cards." << endl;
 
             // empty the multibuild as we have captured these cards
             // Also, we need to empty the single build as multiple build has already captured those cards
@@ -384,11 +402,16 @@ bool Computer::captureCards(vector<Card>& tableCards)
             // unpack the tuple to get the single build
             tie(ignore, singleBuild) = singleBuildCard;
 
+            // Explain move reasoning
+            cout << getPlayerName() << " played " << handCard.cardToString() << " to capture a single build of " << endl;
+
             // push the cards in the single build into the player's pile
             for (auto buildCards : singleBuild)
             {
                cardsOnPile.push_back(buildCards);
+               cout << buildCards.cardToString() << " ";
             }
+            cout << ". It wanted to capture its single build." << endl;
 
             // empty the single build as we have captured these cards
             singleBuild = {};
@@ -447,6 +470,9 @@ bool Computer::captureSetCards(vector<Card>& tableCards, Card & handSelCard)
       {
          setPossible = true;
          
+         // Explain move reasoning
+         cout << getPlayerName() << " played " << handSelCard.cardToString() << " to capture the set of " << endl;
+
          // add the possible set of cards to the player's pile
          // also, add the cards temporarily to a vector of cards to remove 
          // them from the table after capturing is done
@@ -454,20 +480,29 @@ bool Computer::captureSetCards(vector<Card>& tableCards, Card & handSelCard)
          {
             cardsOnPile.push_back(match);
             matchedTableCards.push_back(match);
+            cout << match.cardToString() << " ";
          }
+
+         cout << ". It wanted to maximize the number of captured cards." << endl;
       }
    }
 
    // Add any single card from the table that matches the score of the current card in player's hand
    for (auto tableCard : tableCards)
    {
+      // Explain move reasoning
+      cout << getPlayerName() << " played " << handSelCard.cardToString() << " to capture individual card ";
+
       if (calcSingleCardScore(tableCard) == handCardScore)
       {
+         cout << tableCard.cardToString() << " ";
+
          cardsOnPile.push_back(tableCard);
          cardsOnPile.push_back(handSelCard);
          matchedTableCards.push_back(tableCard);
          setPossible = true;
       }
+      cout << endl;
    }
 
    // if capturing of sets was possible, then remove the captured cards from the table 
@@ -509,11 +544,18 @@ bool Computer::trailCard(vector<Card>& tableCards)
    // treat the generated number as the index from which we select the card to trail
    int randomTableIndex = generate(rng);
 
+   Card trailCard = getCardsOnHand()[randomTableIndex];
+
    // trail the randomly selected card to the table
-   tableCards.push_back(getCardsOnHand()[randomTableIndex]);
+   tableCards.push_back(trailCard);
    
    // remove the card from player's hand once the handCard has been added to the table
-   removeCardFromHand(getCardsOnHand()[randomTableIndex]);
+   removeCardFromHand(trailCard);
 
+   cout << getPlayerName() << " trailed " << trailCard.cardToString() << " because there were no other possible moves." << endl;
    return true;
+}
+
+Computer::~Computer()
+{
 }

@@ -194,6 +194,11 @@ tuple<string, vector<Card>> Player::getSingleBuild() const
    return singleBuildCard;
 }
 
+void Player::setSingleBuild(tuple<string, vector<Card>> build)
+{
+   singleBuildCard = build;
+}
+
 tuple<string, vector<vector<Card>>> Player::getMultipleBuild() const
 {
    return multipleBuildCard;
@@ -367,4 +372,8 @@ Card Player::findCommonCard(const vector<Card>& matchedTableCards)
       }
    }
    return Card();
+}
+
+Player::~Player()
+{
 }

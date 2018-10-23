@@ -21,7 +21,7 @@ public:
    void evaluateScores(std::vector<std::pair<std::string, int>> &roundScores, Round &round);
    void setFirstPlayer(string firstPlayer);
    void displayTourneyResult();
-
+   ~Tournament();
 private:
    int roundNumber;
    int playerOneScore;
