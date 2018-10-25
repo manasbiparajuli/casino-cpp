@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 10/2/2018
+//* Date: 10/23/2018
 //****************************************************
 
 #include "Card.h"
@@ -69,6 +69,14 @@ string Card::cardToString()
    return this->getSuit() + this->getFace();
 }
 
+// ****************************************************************
+// Function Name: cardToString
+// Purpose: get the string value of the card
+//          the function was required to compare Card objects
+// Parameters: none
+// Return value: the string representation of the card
+// Assistance Received: none
+// ****************************************************************
 string Card::cardToString() const
 {
    const string& suitValue = as_const(suit);
@@ -77,10 +85,14 @@ string Card::cardToString() const
    return suitValue + faceValue;
 }
 
-Card::~Card()
-{
-}
-
+// ****************************************************************
+// Function Name: operator==
+// Purpose: overloaded "==" operator to check if two Card objects are equal
+//          the function was required to compare Card objects
+// Parameters: none
+// Return value: returns whether the cards are equal or not
+// Assistance Received: none
+// ****************************************************************
 bool operator==(const Card & card1, const Card & card2)
 {
    if (card1.cardToString() == card2.cardToString())
@@ -88,4 +100,15 @@ bool operator==(const Card & card1, const Card & card2)
       return true;
    }
    return false;
+}
+
+// ****************************************************************
+// Function Name: ~Card
+// Purpose: serves as a default destructor
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
+Card::~Card()
+{
 }

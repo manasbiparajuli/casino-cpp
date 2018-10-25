@@ -14,6 +14,24 @@
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
+Round::Round()
+{
+   roundNumber = 1;
+   numberOfPlayers = 2;
+   humanIndex = 0;
+   computerIndex = 1;
+   nextPlayer = "";
+   isNewGame = true;
+}
+
+// ****************************************************************
+// Function Name: Round
+// Purpose: serves as a default constructor for Round class
+// Parameters: -> next, a string. Holds the name of the next player
+//             -> lastCap, a string. Holds the last capturer in the game
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Round::Round(string next, string lastCap,  int rnd = 1) : 
    nextPlayer(next), 
    lastCapturer(lastCap), 
@@ -22,11 +40,7 @@ Round::Round(string next, string lastCap,  int rnd = 1) :
    numberOfPlayers = 2;
    isNewGame = false;
 
-   createPlayers();
-}
-
-void Round::createPlayers()
-{
+   // Set the index of the players based on who the next player is
    if (nextPlayer == "Human")
    {
       humanIndex = 0;
@@ -38,6 +52,41 @@ void Round::createPlayers()
       computerIndex = 0;
    }
 
+   if (lastCapturer == "Human")
+   {
+      humanIndex = 0;
+      computerIndex = 1;
+   }
+   if (lastCapturer == "Computer")
+   {
+      humanIndex = 1;
+      computerIndex = 0;
+   }
+
+   players[humanIndex] = new Human("Human");
+   players[computerIndex] = new Computer("Computer");
+}
+
+// ****************************************************************
+// Function Name: createPlayers
+// Purpose: creates a pointer to two players each of human and computer and sets their index
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
+void Round::createPlayers()
+{
+   // Set the index of the players based on who the next player is
+   if (nextPlayer == "Human")
+   {
+      humanIndex = 0;
+      computerIndex = 1;
+   }
+   if (nextPlayer == "Computer")
+   {
+      humanIndex = 1;
+      computerIndex = 0;
+   }
    players[humanIndex] = new Human("Human");
    players[computerIndex] = new Computer("Computer");
 }
@@ -56,10 +105,20 @@ void Round::startGame()
    isNewGame = true;
 }
 
+// ****************************************************************
+// Function Name: loadGame
+// Purpose: loads the game from a file
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::loadGame()
 {
+   system("cls");
+   isNewGame = false;
+
    // get the text file to load from the player
-   string fileName = " ";
+   string fileName;
 
    // flag for correct file read
    bool fileRead = true;
@@ -76,6 +135,7 @@ void Round::loadGame()
       if (!openFile.is_open())
       {
          cerr << "Invalid text file read. Try Again." << endl;
+         system("cls");
          fileRead = false;
       }
 
@@ -88,26 +148,75 @@ void Round::loadGame()
          // the line number that the file pointer is pointing to when reading
          int lineNumber = 0;
 
-         // start reading from the file
+         // create players with the correct index first when loading from the file
          while (getline(openFile, line))
          {
             lineNumber++;
-            setSavedPreferences(lineNumber, line);
-         }
+            // Next Player: Human
+            if (lineNumber == 21)
+            {
+               auto const posCol = line.find_first_of(':');
+               line = line.substr(posCol + 1);
 
-         // close reading the file
+               stringstream str(line);
+               string token;
+               while (str >> token)
+               {
+                  if (token == "Human" || token == "Computer")
+                  {
+                     setNextPlayer(token);
+                     createPlayers();
+                     break;
+                  }
+               }
+            }
+         }
          openFile.close();
 
-         fileRead = true;
+         // stream object to read from the file
+         ifstream openFile(fileName.c_str());
+
+         // check if the file was able to be read
+         if (!openFile.is_open())
+         {
+            cerr << "Invalid text file read. Try Again." << endl;
+            fileRead = false;
+         }
+         else
+         {
+            // reset the line number now that we proceed to setting other variables
+            lineNumber = 0;
+            // start reading from the file
+            while (getline(openFile, line))
+            {
+               lineNumber++;
+               setSavedPreferences(lineNumber, line);
+            }
+            // close reading the file
+            openFile.close();
+
+            fileRead = true;
+         }
       }
    } while (fileRead == false);
 }
 
+// ****************************************************************
+// Function Name: setSavedPreferences
+// Purpose: sets the values from the file into the current round
+// Parameters: -> lineNumber, an integer. The current linenumber that the filestream is pointing to
+//             -> line, a string. The string that the current line holds
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::setSavedPreferences(int lineNumber, string line)
 {
+   // parsed string of the stringstream
    string token;
-   int wordCount = 0;
+
    stringstream str(line);
+
+   // the card representation as string
    vector<string> cards;
    
    // Round: 3
@@ -123,7 +232,7 @@ void Round::setSavedPreferences(int lineNumber, string line)
    {
       while (str >> token)
       {
-         if (token != "Score:") { players[computerIndex]->setPlayerScore(stoi(token)); }
+		  if (token != "Score:") { players[computerIndex]->setPlayerScore(stoi(token));}
       }
    }
    // Computer's Hand: H5 H6 D4 D7
@@ -178,19 +287,64 @@ void Round::setSavedPreferences(int lineNumber, string line)
    else if (lineNumber == 13)
    {
       cards = {};
-      while (str >> token)
+
+	  // get the string after the last occurence of ']'
+	  auto const pos = line.find_last_of(']');
+	  const auto leaf = line.substr(pos + 1);
+
+	  string cardString;
+	  stringstream innerstr(leaf);
+
+      while (innerstr >> cardString)
       {
-         if (token != "Table:")
-         {
-            cards.push_back(token);
-         }
+		  // check if there are no builds in the table
+		  if (cardString != "Table:")
+		  {
+			  cards.push_back(cardString);
+		  }
       }
       setTableCards(makeCardFromFile(cards));
    }
    //Build Owner: [ [C6 S3] [S9] ] Human
    else if (lineNumber == 15)
    {
+	   string token = "";
+	   string owner = "";
+	   int playerindex = 0;
 
+	   stringstream str(line);
+
+	   // Remove the Build Owner: tag from the string
+	   auto const pos = line.find_first_of(':');
+	   line = line.substr(pos + 1);
+
+	   // get the single build
+	   auto const posOpen = line.find_first_of('[');
+	   auto const posClose = line.find_last_of(']');
+	   token = line.substr(posOpen + 1, posClose - posOpen - 1);
+
+	   stringstream str2(token);
+
+      // push the card strings
+	   while (str2 >> token)
+	   {
+		   cards.push_back(token);
+	   }
+	   
+	   token = "";
+
+	   // Get the build owner and set the player build
+	   while (str >> token)
+	   {
+		   if (token == "Computer" || token == "Human")
+		   {
+			   if (token == "Computer") { owner = token; playerindex = computerIndex; }
+				else if (token == "Human") { owner = token; playerindex = humanIndex; }
+
+				tuple <string, vector<Card>> singleBld = make_tuple(owner, makeCardFromFile(cards));
+				players[playerindex]->setSingleBuild(singleBld);
+			}
+	   }
    }
    // Last Capturer: Human
    else if (lineNumber == 17)
@@ -210,20 +364,16 @@ void Round::setSavedPreferences(int lineNumber, string line)
       }
       setDeck(makeCardFromFile(cards));
    }
-   // Next Player: Human
-   else if (lineNumber == 21)
-   {
-      while (str >> token)
-      {
-         if (token != "Next" || token != "Player:") 
-         { 
-            setNextPlayer(token); 
-            createPlayers();
-         }
-      }
-   }
 }
 
+// ****************************************************************
+// Function Name: makeCardFromFile
+// Purpose: transforms the string of cards into vector of Card objects
+// Parameters: -> cards, vector of string. The vector of strings that need to be 
+//                      converted into Card objects
+// Return value: vector of card objects.
+// Assistance Received: none
+// ****************************************************************
 vector<Card> Round::makeCardFromFile(vector<string> cards)
 {
    vector<Card> cardList = {};
@@ -271,6 +421,8 @@ void Round::printDeckConfigChoices()
 
    // load deck from file
    else { loadDeckFromFile(); }
+
+   cout << "******************************" << endl;
 }
 
 // ****************************************************************
@@ -349,14 +501,13 @@ void Round::loadDeckFromFile()
    } while (fileRead == false);
 
    setDeck(tempDeck);
-   cout << "setdeck" << endl;
 }
 
 // ****************************************************************
 // Function Name: displayMainMenu
 // Purpose: displays the options that the player can use in the game
 //          and asks for their choices
-// Parameters: none
+// Parameters: turn, an integer. The current turn in the game
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
@@ -369,7 +520,7 @@ void Round::displayMainMenu(int& turn)
    cout << "3. Ask for help \n";
    cout << "4. Quit Game \n";
    cout << "****************************************************\n";
-   cout << "Enter Your Choice (1-4). ";
+   cout << "Enter Your Choice (1-4): ";
 
    // player input for the choices
    int choice;
@@ -399,10 +550,10 @@ void Round::displayMainMenu(int& turn)
 }
 
 // ****************************************************************
-// Function Name: dealCardsToPlayer()
+// Function Name: dealCardsToPlayer
 // Purpose: deals cards to Human, Computer and places next four cards
 //          on the table
-// Parameters: none
+// Parameters: newRound, the boolean that holds the flag as new round
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
@@ -413,7 +564,7 @@ void Round::dealCardsToPlayers(bool newRound)
    if (newRound == true) { totalCardsToDeal = 12; }
    else { totalCardsToDeal = 8; }
 
-   // get cards based on whether it is a new or ongoing round and deal
+   // get cards based on whether it is a new or ongoing round and deal accordingly
    for (int i = 0; i < totalCardsToDeal; i++)
    {
       Card card = deck.dealCard();
@@ -428,7 +579,6 @@ void Round::dealCardsToPlayers(bool newRound)
       {
          players[computerIndex]->addCardsToHand(card);
       }
-
       // Deal cards on the table if it is a new round
       if (newRound == true)
       {
@@ -440,23 +590,31 @@ void Round::dealCardsToPlayers(bool newRound)
    }
 }
 
+// ****************************************************************
+// Function Name: gamePlay
+// Purpose: the logic behind the gameplay
+// Parameter: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::gamePlay()
 {
    // store the turns in the current round to alternate between players
    int turns = 0;
-   
+   int pl1Hand = 0, pl2Hand = 0;
+
    do
    {
-      // store the size of the players' cards on hand
-      int pl1Hand = players[humanIndex]->getCardsOnHand().size();
-      int pl2Hand = players[computerIndex]->getCardsOnHand().size();
-
       // Deal cards to players and place cards on table at the start of the first round
       if (isNewGame == true)
       {
          dealCardsToPlayers(true);
          isNewGame = false;
       }
+
+      // store the size of the players' cards on hand
+      pl1Hand = players[humanIndex]->getCardsOnHand().size();
+      pl2Hand = players[computerIndex]->getCardsOnHand().size();
 
       // Deal cards only to players if both of their hands are empty and deck is not empty
       if (pl1Hand <= 0 && pl2Hand <= 0 && deck.isDeckEmpty() == false)
@@ -465,8 +623,8 @@ void Round::gamePlay()
       }
 
       // Player who last captured picks up remaining cards on the table after there are no
-      // cards on hand of both the players and the deck is empty
-      if (pl1Hand <= 0 && pl2Hand <= 0 && deck.isDeckEmpty() == true)
+      // cards on hand of one of the players and the deck is empty
+      if ((pl1Hand == 0 && pl2Hand > 0 && deck.isDeckEmpty() == true) || (pl1Hand > 0 && pl2Hand == 0 && deck.isDeckEmpty() == true))
       {
          for (int i = 0; i < numberOfPlayers; i++)
          {
@@ -491,17 +649,33 @@ void Round::gamePlay()
       // Display options for the player before every turn
       displayMainMenu(turns);
 
-   } while (deck.isDeckEmpty() == false);
+      pl1Hand = players[humanIndex]->getCardsOnHand().size();
+      pl2Hand = players[computerIndex]->getCardsOnHand().size();
+
+   } while (!(pl1Hand <= 0 && pl2Hand <= 0 && deck.isDeckEmpty() == true));
    
    // Increment the round number as we finished the deck
    roundNumber++;
 }
 
+// ****************************************************************
+// Function Name: makeMove
+// Purpose: alternates turns between players
+// Parameter: turn, the current turn in the game
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::makeMove(int& turn)
 {
    tuple<string, vector<Card>> oppoBuild;
 
+   // get the turn values as 0 or 1
    int turnIndex = turn % numberOfPlayers;
+   
+   // Name player's turn
+   cout << "****************************************************\n";
+   cout << players[turnIndex]->getPlayerName() << "'s turn" << endl;
+   cout << "****************************************************\n";
 
    // Handle player turns  
    // First Player turn
@@ -521,7 +695,6 @@ void Round::makeMove(int& turn)
       {
          lastCapturer = players[turnIndex]->getPlayerName();
       }
-
       // increment the turn
       turn++;
    }
@@ -542,7 +715,6 @@ void Round::makeMove(int& turn)
       {
          lastCapturer = players[turnIndex]->getPlayerName();
       }
-
       // increment the turn
       turn++;
    }
@@ -565,13 +737,20 @@ void Round::calculateScore()
    score.calculateTotalScore();
 
    // get the scores of both players and then set their scores by passing their scores.
-   int humanScore = score.getPlayerOneScore();
-   int computerScore = score.getPlayerTwoScore();
+   int humanScore = score.getPlayerOneScore() + players[humanIndex]->getPlayerScore();
+   int computerScore = score.getPlayerTwoScore() + players[computerIndex]->getPlayerScore();
 
    players[humanIndex]->setPlayerScore(humanScore);
    players[computerIndex]->setPlayerScore(computerScore);
 }
 
+// ****************************************************************
+// Function Name: sendRndScoreToTourney
+// Purpose: returns the pair of players' score and their round scores to the tournament
+// Parameter: none
+// Return value: a vector of pair of string and int that refer to player's names and their scores respectively
+// Assistance Received: none
+// ****************************************************************
 vector<pair<string, int>> Round::sendRndScoreToTourney()
 {
    vector<pair<string, int>> scores = {};
@@ -593,6 +772,7 @@ vector<pair<string, int>> Round::sendRndScoreToTourney()
 // ****************************************************************
 void Round::printScore()
 {
+   cout << "*************************************************" << endl;
    cout << "The scores at the end of the round are: " << endl;
 
    for (int i = 0; i < numberOfPlayers; i++)
@@ -621,9 +801,10 @@ void Round::saveGame()
       abort();
    }
 
-   saveToFile << "Round: " << getRoundNumber();
+   saveToFile << "Round: " << getRoundNumber() << endl;
    
    // Start saving computer's game data
+   saveToFile << endl;
    saveToFile << "Computer: " << endl;
    saveToFile << "Score: " << players[computerIndex]->getPlayerScore() << endl;
    
@@ -644,7 +825,7 @@ void Round::saveGame()
    saveToFile << endl;
 
    // Start saving human's game data
-   saveToFile << "\n" << endl;
+   saveToFile << endl;
    saveToFile << "Human: " << endl;
    saveToFile << "Score: " << players[humanIndex]->getPlayerScore() << endl;
 
@@ -663,22 +844,30 @@ void Round::saveGame()
       saveToFile << card.cardToString() << " ";
    }
    saveToFile << endl;
-   saveToFile << "\n" << endl;
+   saveToFile << endl;
 
    saveToFile << "Table: ";   
    saveTableCardsToFile(saveToFile);
 
-   saveToFile << "\nBuild Owner: " << endl;
+   saveToFile << endl;
+   saveToFile << endl;
+   saveToFile << "Build Owner: " << endl;
    saveBuildOwnerToFile(saveToFile);
 
+   // save the last capturer
+   saveToFile << endl;
+   saveToFile << "Last Capturer: " << getLastCapturer() << endl;
+
    // save the current cards on deck to the file
-   saveToFile << "\nDeck: ";
+   saveToFile << endl;
+   saveToFile << "Deck: ";
    for (auto card : deck.getDeck())
    {
       saveToFile << card.cardToString() << " ";
    }
    saveToFile << endl;
 
+   saveToFile << endl;
    saveToFile << "Next Player: " << getNextPlayer();
 
    // close the output file
@@ -688,6 +877,13 @@ void Round::saveGame()
    quitGame();
 }
 
+// ****************************************************************
+// Function Name: saveBuildOwnerToFile
+// Purpose: saves the build owner to file
+// Parameter: saveToFile -> ofstream object. Holds the file stream for saving to file
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::saveBuildOwnerToFile(ofstream &saveToFile)
 {
    vector<vector<Card>> multiBuild;
@@ -714,7 +910,6 @@ void Round::saveBuildOwnerToFile(ofstream &saveToFile)
       saveSingleBuildToFile(saveToFile, singleBuild);
       saveToFile << players[humanIndex]->getPlayerName();
    }
-
    if (players[computerIndex]->isSingleBuildExist() == true)
    {
       tie(ignore, singleBuild) = players[computerIndex]->getSingleBuild();
@@ -723,6 +918,13 @@ void Round::saveBuildOwnerToFile(ofstream &saveToFile)
    }
 }
 
+// ****************************************************************
+// Function Name: saveTableCardsToFile
+// Purpose: saves the player's single and multiple builds and then the ongoing table cards to file
+// Parameter: saveToFile -> ofstream object. Holds the file stream for saving to file
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::saveTableCardsToFile(ofstream &saveToFile)
 {
    vector<vector<Card>> multiBuild;
@@ -746,13 +948,13 @@ void Round::saveTableCardsToFile(ofstream &saveToFile)
       tie(ignore, singleBuild) = players[humanIndex]->getSingleBuild();
       saveSingleBuildToFile(saveToFile, singleBuild);
    }
-
    if (players[computerIndex]->isSingleBuildExist() == true)
    {
       tie(ignore, singleBuild) = players[computerIndex]->getSingleBuild();
       saveSingleBuildToFile(saveToFile, singleBuild);
    }
 
+   // save table cards after saving builds to file
    for (auto tableCards : getTableCards())
    {
       saveToFile << tableCards.cardToString() << " ";
@@ -760,6 +962,14 @@ void Round::saveTableCardsToFile(ofstream &saveToFile)
    cout << endl;
 }
 
+// ****************************************************************
+// Function Name: saveSingleBuildToFile
+// Purpose: saves the player's single build to a text file
+// Parameter: saveToFile -> ofstream object. Holds the file stream for saving to file
+//            multiBuild -> vector of Cards. Holds the player's single to be saved to a file 
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::saveSingleBuildToFile(ofstream &saveToFile, vector<Card> &singleBuild)
 {
    saveToFile << "[";
@@ -770,6 +980,14 @@ void Round::saveSingleBuildToFile(ofstream &saveToFile, vector<Card> &singleBuil
    saveToFile << "]";
 }
 
+// ****************************************************************
+// Function Name: saveMultipleBuildToFile
+// Purpose: saves the player's multiple build to a text file
+// Parameter: saveToFile -> ofstream object. Holds the file stream for saving to file
+//            multiBuild -> vector of vector of Cards. Holds the player's multibuild to be saved to a file 
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::saveMultipleBuildToFile(std::ofstream &saveToFile, vector<vector<Card>> &multiBuild)
 {
    saveToFile << "[ ";
@@ -788,13 +1006,19 @@ void Round::saveMultipleBuildToFile(std::ofstream &saveToFile, vector<vector<Car
 
 // ****************************************************************
 // Function Name: getHelp
-// Purpose: gets help to make moves based on a strategy for the player
-// Parameter: none
+// Purpose: gets help to make moves based on a strategy for the human players
+// Parameter: turn-> holds the current turn in the round
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
 void Round::getHelp(int & turn)
 {
+   int turnIndex = turn % numberOfPlayers;
+
+   if (players[turnIndex]->getPlayerName() == "Computer")
+   {
+      cout << "Invalid. Computer cannot get help function!!" << endl;
+   }
 }
 
 // ****************************************************************
@@ -821,16 +1045,37 @@ int Round::getRoundNumber() const
    return roundNumber;
 }
 
+// ****************************************************************
+// Function Name: setRoundNumber
+// Purpose: sets the current round number
+// Parameter: rnd, an integer value. Holds the new round number
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::setRoundNumber(int rnd)
 {
    roundNumber = rnd;
 }
 
+// ****************************************************************
+// Function Name: getLastCapturer
+// Purpose: gets the last capturer player in the game
+// Parameters: none
+// Return value: identifier of the last capturer player, a string.
+// Assistance Received: none
+// ****************************************************************
 string Round::getLastCapturer() const
 {
    return lastCapturer;
 }
 
+// ****************************************************************
+// Function Name: setLastCapturer
+// Purpose: sets the last capturer in the game
+// Parameters: capturer, a string. Holds the name of the last capturer in the game
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::setLastCapturer(string capturer)
 {
    lastCapturer = capturer;
@@ -848,39 +1093,87 @@ string Round::getNextPlayer() const
    return nextPlayer;
 }
 
+// ****************************************************************
+// Function Name: setNextPlayer
+// Purpose: sets the next player in the game
+// Parameters: next, a string. Holds the name of the next player in the game
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::setNextPlayer(string next)
 {
    nextPlayer = next;
 }
 
+// ****************************************************************
+// Function Name: setDeck
+// Purpose: sets the deck in the game
+// Parameters: tempDeck, a vector of cards. Hold the new deck for the game
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::setDeck(vector<Card> tempDeck)
 {
    deck.setDeck(tempDeck);
-   deck.printDeck();
 }
 
-
+// ****************************************************************
+// Function Name: getTableCards
+// Purpose: gets the current cards in the table
+// Parameters: none
+// Return value: a vector of table cards.
+// Assistance Received: none
+// ****************************************************************
 vector<Card>& Round::getTableCards()
 {
    return tableCards;
 }
 
+// ****************************************************************
+// Function Name: setTableCards
+// Purpose: sets the current cards in the table
+// Parameters: cards, a vector of table cards
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::setTableCards(vector<Card> cards)
 {
    tableCards = cards;
 }
 
+// ****************************************************************
+// Function Name: getString
+// Purpose: converts a character into a string
+// Parameters: x, a character. Holds any character that needs conversion to string
+// Return value: the string representation of the character
+// Assistance Received: none
+// ****************************************************************
 string Round::getString(char x)
 {
    string temp(1, x);
    return temp;
 }
 
+// ****************************************************************
+// Function Name: isTableEmpty
+// Purpose: checks if the table is empty or not
+// Parameters: none
+// Return value: returns true or false based on whether the table is empty or not
+// Assistance Received: none
+// ****************************************************************
 bool Round::isTableEmpty() const
 {
    return tableCards.empty();
 }
 
+// ****************************************************************
+// Function Name: removeCardFromTable
+// Purpose: remove the group of cards from table
+// Parameters: cardsToRemove, a vector of cards that need to be 
+//                   removed from the table
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::removeCardsFromTable(vector<Card> cardsToRemove)
 {
    for (auto builtCards : cardsToRemove)
@@ -889,16 +1182,25 @@ void Round::removeCardsFromTable(vector<Card> cardsToRemove)
    }
 }
 
+// ****************************************************************
+// Function Name: displayRoundStatus
+// Purpose: prints the cards held by the players and on their pile. 
+//          also, prints the deck and the cards on the table
+// Parameter: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Round::displayRoundStatus()
-{
+{   
    cout << "**********************************" << endl;
+   cout << "Deck: ";
+   deck.printDeck();
    cout << "**********************************" << endl;
    printCardsOnTable();
    cout << "**********************************" << endl;
    printCardsOnHand();
    cout << "**********************************" << endl;
    printCardsOnPile();
-   cout << "**********************************" << endl;
    cout << "**********************************" << endl;
 }
 
@@ -958,6 +1260,13 @@ void Round::printCardsOnPile()
    }
 }
 
+// ****************************************************************
+// Function Name: ~Round
+// Purpose: destructor for Round class 
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Round::~Round()
 {
 }

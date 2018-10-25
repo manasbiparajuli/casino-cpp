@@ -8,7 +8,7 @@
 #include "Tournament.h"
 
 // ****************************************************************
-// Function Name: Tournament()
+// Function Name: Tournament
 // Purpose: serves as a default constructor for Tournament class
 // Parameters: none
 // Return value: none
@@ -26,7 +26,7 @@ Tournament::Tournament()
 }
 
 // ****************************************************************
-// Function Name: startMenu()
+// Function Name: startMenu
 // Purpose: gives option for the user to either start a new game or 
 //          load a game from a saved file
 // Parameters: none
@@ -115,7 +115,7 @@ void Tournament::newGame()
    // get the round's players' names and their respective scores as pairs
    vector<pair<string, int>> roundScores;
 
-   // flag that identies whether this is a new round or not
+   // flag that identifies whether this is a new round or not
    bool newRound = false;
 
    cout << "\n**********************************" << endl;
@@ -126,32 +126,38 @@ void Tournament::newGame()
    tossCoin();
 
    Round round(firstPlayer, lastCapturer, roundNumber);
+   round.printDeckConfigChoices();
 
    // play the game until one of the players reach at least a score of 21 
-   do
+   while (playerOneScore < 21 || playerTwoScore < 21)
    {
       // for subsequent rounds, the first player will be decided by the last capturer
       if (newRound == true)
       {
          firstPlayer = "";
          Round round(firstPlayer, lastCapturer, roundNumber);
+         round.printDeckConfigChoices();
       }
 
+      cout << "Round: " << roundNumber << endl;
+
+      // Play the game, then get the round scores to be added to the tournament score
       round.gamePlay();
       evaluateScores(roundScores, round);
+      round.printScore();
+
+      // The round has ended, now increment the round and store the last capturer for the new round 
       lastCapturer = round.getLastCapturer();
       roundNumber++;
       newRound = true;
 
       // display scores at the end of each round
       cout << "\n**********************************" << endl;
-      cout << "Scores at end of round " << roundNumber << endl;
+      cout << "Total Scores at end of round " << roundNumber << endl;
       cout << firstPlayerName << ": " << playerOneScore << endl;
       cout << secondPlayerName << ": " << playerTwoScore << endl;
       cout << "\n**********************************" << endl;
-
-   } while (!(playerOneScore >= 21 || playerTwoScore >= 21));
-
+   }
    displayTourneyResult();
 }
 
@@ -167,50 +173,63 @@ void Tournament::loadGame()
    // get the round's players' names and their respective scores as pairs
    vector<pair<string, int>> roundScores;
 
-   // flag that identies whether this is a new round or not
+   // flag that identifies whether this is a new round or not
    bool newRound = false;
 
-   Round round(firstPlayer, lastCapturer, roundNumber);
+   // load the new game and the scores of the players
+   Round round;
    round.loadGame();
-   roundNumber = round.getRoundNumber();
    evaluateScores(roundScores, round);
 
-   do
+   while (playerOneScore < 21 || playerTwoScore < 21)
    {
       // for subsequent rounds, the first player will be decided by the last capturer
       if (newRound == true)
       {
          firstPlayer = "";
          Round round(firstPlayer, lastCapturer, roundNumber);
+         round.printDeckConfigChoices();
       }
-
+      // Play the game, then get the round scores to be added to the tournament score
       round.gamePlay();
       evaluateScores(roundScores, round);
       lastCapturer = round.getLastCapturer();
+      round.printScore();
       roundNumber++;
       newRound = true;
 
       // display scores at the end of each round
-      cout << "SCORES: " << endl;
+      cout << "\n**********************************" << endl;
+      cout << "Total Scores at end of round " << roundNumber << endl;
       cout << firstPlayerName << ": " << playerOneScore << endl;
       cout << secondPlayerName << ": " << playerTwoScore << endl;
-
-   } while (!(playerOneScore >= 21 || playerTwoScore >= 21 ));
-
+      cout << "\n**********************************" << endl;
+   }
    displayTourneyResult();
 }
 
+// ****************************************************************
+// Function Name: evaluateScores
+// Purpose: sets the scores of the players so far in the tournament
+// Parameters: roundScores, a vector of pairs of string and int that 
+//                 maps to player name and scores respectively.
+//                 Passed by reference
+//             ->round, a Round class object that is passed by reference.
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Tournament::evaluateScores(vector<pair<string, int>> &roundScores, Round &round)
 {
    // get the pair of players and scores from the round
+   round.calculateScore();
    roundScores = round.sendRndScoreToTourney();
+
+   // keep track of the number of players so that we store the correct score for them
+   int count = 0;
 
    // store the players' names and scores
    for (auto players : roundScores)
    {
-      // keep track of the number of players so that we store the correct score for them
-      int count = 0;
-
       if (count == 0)
       {
          firstPlayerName = players.first;
@@ -228,8 +247,7 @@ void Tournament::evaluateScores(vector<pair<string, int>> &roundScores, Round &r
 // ****************************************************************
 // Function Name: setFirstPlayer
 // Purpose: sets the first player to start the game
-// Parameters: firstPlayer, a character. Options include 'H' for human, 
-//             'C' for computer. 
+// Parameters: firstPlayer, a string. Options include "Human" and "Computer". 
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
@@ -238,10 +256,17 @@ void Tournament::setFirstPlayer(string firstPlayer)
    this->firstPlayer = firstPlayer;
 }
 
+// ****************************************************************
+// Function Name: displayTourneyResult
+// Purpose: displays the tournament score
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Tournament::displayTourneyResult()
 {
    cout << "\n*******************************************" << endl;
-   cout << "SCORES: " << endl;
+   cout << "Tournament SCORES: " << endl;
    cout << firstPlayerName << ": " << playerOneScore << endl;
    cout << secondPlayerName << ": " << playerTwoScore << endl;
 
@@ -261,6 +286,13 @@ void Tournament::displayTourneyResult()
    cout << "\n*******************************************" << endl;
 }
 
+// ****************************************************************
+// Function Name: ~Tournament
+// Purpose: serves as a default destructor for Tournament class
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Tournament::~Tournament()
 {
 }

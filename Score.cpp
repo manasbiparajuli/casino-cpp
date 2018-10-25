@@ -7,12 +7,28 @@
 
 #include "Score.h"
 
+// ****************************************************************
+// Function Name: Score
+// Purpose: default constructor for Score class 
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Score::Score()
 {
    this-> playerOneScore = 0;
    this-> playerTwoScore = 0;
 }
 
+// ****************************************************************
+// Function Name: Score
+// Purpose: default constructor for Score class that takes in the pile cards of the 
+//          players and calculates the score
+// Parameters: playerOnePile, a vector Card object. The cards in pile of the first player
+//             playerTwoPile, a vector Card object. The cards in pile of the second player
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Score::Score(vector<Card> playerOnePile, vector<Card> playerTwoPile)
 {
    this->playerOneScore = 0;
@@ -21,31 +37,76 @@ Score::Score(vector<Card> playerOnePile, vector<Card> playerTwoPile)
    this->playerTwoPile = playerTwoPile;
 }
 
+// ****************************************************************
+// Function Name: setPlayerOneScore
+// Purpose: updates the score of player one
+// Parameter: score, an integer value. This score will be added 
+//            to the player's total
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::setPlayerOneScore(int score)
 {
    playerOneScore += score;
 }
 
+// ****************************************************************
+// Function Name: setPlayerTwoScore
+// Purpose: updates the score of player two
+// Parameter: score, an integer value. This score will be added 
+//            to the player's total
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::setPlayerTwoScore(int score)
 {
    playerTwoScore += score;
+
 }
 
+// ****************************************************************
+// Function Name: getPlayerOneScore
+// Purpose: gets the score of player one
+// Parameter: none
+// Return value: The current score of the player one
+// Assistance Received: none
+// ****************************************************************
 int Score::getPlayerOneScore() const
 {
    return playerOneScore;
 }
 
+// ****************************************************************
+// Function Name: getPlayerTwoScore
+// Purpose: gets the score of player two
+// Parameter: none
+// Return value: The current score of player two
+// Assistance Received: none
+// ****************************************************************
 int Score::getPlayerTwoScore() const
 {
    return playerTwoScore;
 }
 
+// ****************************************************************
+// Function Name: getBuildComb
+// Purpose: gets the map of the possible build and corresponding scores
+// Parameter: none
+// Return value: map of possible build and corresponding scores
+// Assistance Received: none
+// ****************************************************************
 multimap<int, vector<Card>> Score::getBuildComb() const
 {
    return buildComb;
 }
 
+// ****************************************************************
+// Function Name: calculateMostCards
+// Purpose: sets the scores of the player with the most number of cards in pile
+// Parameter : none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::calculateMostCards()
 {
    int plOneTotal = static_cast<int> (playerOnePile.size());
@@ -54,10 +115,18 @@ void Score::calculateMostCards()
    cout << "Human has    " << plOneTotal << " cards." << endl;
    cout << "Computer has " << plTwoTotal << " cards." << endl;
 
+   // Player with most cards gets a score of 3
    if (plOneTotal > plTwoTotal) { setPlayerOneScore(3); }
    else if (plOneTotal < plTwoTotal) { setPlayerTwoScore(3); }
 }
 
+// ****************************************************************
+// Function Name: calculateMostSpades
+// Purpose: sets the scores of the player with the most number of spades in pile
+// Parameter : none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::calculateMostSpades()
 {
    int plOneTotal = 0;
@@ -80,6 +149,13 @@ void Score::calculateMostSpades()
    else if (plOneTotal < plTwoTotal) { setPlayerTwoScore(1); }
 }
 
+// ****************************************************************
+// Function Name: calculate10OfDiamonds
+// Purpose: sets the score of the player with 10 of Diamonds a value of 2
+// Parameter : none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::calculate10OfDiamonds()
 {
    bool plOneHas10OfDiamonds = false;
@@ -93,10 +169,16 @@ void Score::calculate10OfDiamonds()
          break;
       }
    }
-
-   if (!plOneHas10OfDiamonds) { setPlayerTwoScore(2); }
+   if (plOneHas10OfDiamonds == false) { setPlayerTwoScore(2); }
 }
 
+// ****************************************************************
+// Function Name: calculate2OfSpades
+// Purpose: sets the score of the player with 2 of Spades a value of 1
+// Parameter : none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::calculate2OfSpades()
 {
    bool plOneHas2OfSpades = false;
@@ -110,10 +192,16 @@ void Score::calculate2OfSpades()
          break;
       }
    }
-
-   if (!plOneHas2OfSpades) { setPlayerTwoScore(1); }
+   if (plOneHas2OfSpades == false) { setPlayerTwoScore(1); }
 }
 
+// ****************************************************************
+// Function Name: calculatePerAce
+// Purpose: adds a score to every Ace card that a player has in pile
+// Parameter : none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::calculatePerAce()
 {
    int plOneTotal = 0;
@@ -133,6 +221,13 @@ void Score::calculatePerAce()
    setPlayerTwoScore(plTwoTotal);
 }
 
+// ****************************************************************
+// Function Name: calculateTotalScore
+// Purpose: calculates the total score of the player by applying the scoring rules
+// Parameter : none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::calculateTotalScore()
 {
    calculateMostCards();
@@ -142,6 +237,13 @@ void Score::calculateTotalScore()
    calculatePerAce();
 }
 
+// ****************************************************************
+// Function Name: cardScore
+// Purpose: calculate the numerical equivalent of a card
+// Parameters: tempCard, a string value of a card
+// Return value: integer value, the numerical equivalent of a card
+// Assistance Received: none
+// ****************************************************************
 int Score::cardScore(Card tempCard)
 {
    string face = tempCard.getFace();
@@ -162,9 +264,17 @@ int Score::cardScore(Card tempCard)
    return 0;
 }
 
+// ****************************************************************
+// Function Name: calcBuildScore
+// Purpose: calculate the score of the build
+// Parameters: buildCards, a vector of strings. It holds the build combination.
+// Return value: integer value, the score of the build
+// Assistance Received: none
+// ****************************************************************
 int Score::calcBuildScore(const vector<Card> buildCards)
 {
    int score = 0;
+   // Go through the build and add the score of each of the cards
    for (auto cards : buildCards)
    {
       score += cardScore(cards);
@@ -172,14 +282,25 @@ int Score::calcBuildScore(const vector<Card> buildCards)
    return score;
 }
 
+// ****************************************************************
+// Function Name: powerSet
+// Purpose: calculate the power set based on the size of the table
+// Parameters: tableSize, an integer value. It holds the size of the table
+// Return value: a vector of string that lists all the possible valid power sets
+// Assistance Received: none
+// ****************************************************************
 vector<string> Score::powerSet(int tableSize)
 {
+   // the power set that will be used to create a map of possible scores
    vector <string> validSets;
+
+   // all the power sets possible
    vector<char> temp;
    vector<string> totalSets;
 
    vector<int> index = {};
 
+   // input numbers into the vector that will be used to create the possible power set 
    for (int i = 0; i < tableSize; i++)
    {
       index.push_back('0' + i);
@@ -206,8 +327,7 @@ vector<string> Score::powerSet(int tableSize)
       totalSets.push_back(comb);
    }
 
-   // Get only the combinations that we can form a pair with
-   // We want pairs of cards, not a single card
+   // Get only the combinations that has more than one card as we don't form a build with only a single card
    for (auto a : totalSets)
    {
       if (a.size() > 1)
@@ -218,12 +338,30 @@ vector<string> Score::powerSet(int tableSize)
    return validSets;
 }
 
+// ****************************************************************
+// Function Name: buildScoreMap
+// Purpose: constructs a map of possible builds with the current table cards corresponding to 
+//          the build score
+// Parameters: -> powerSets, a vector of string. It holds the possible power set combinations that 
+//                      can be formed using the current cards in the table.
+//             -> tableCards, a vector of cards. It holds the current table cards.
+//       
+//       Both parameters have been passed by reference.
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::buildScoreMap(vector<string>& powerSets, const vector<Card>& tableCards)
 {
+   // the build combination score 
    int buildCombiScore = 0;
+
+   // the combination of cards for the build
    vector<Card> buildCards;
+
+   // the integer representation of index that was converted from a character
    int buildIndex;
 
+   // map the generated power set to the repective indices of cards in the table
    for (auto build : powerSets)
    {
       buildCards = {};
@@ -235,15 +373,24 @@ void Score::buildScoreMap(vector<string>& powerSets, const vector<Card>& tableCa
          buildCards.push_back(tableCards[buildIndex]);
       }
 
+      // calculate the build score and insert into the map as a pair
       buildCombiScore = calcBuildScore(buildCards);
       buildComb.insert(make_pair(buildCombiScore, buildCards));
    }
 }
 
+// ****************************************************************
+// Function Name: printBuildMap
+// Purpose: prints the map of the build and its corresponding score
+// Parameters: map, a multimap of integer and vector of Cards
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Score::printBuildMap(multimap<int, vector<Card>> map)
 {
    multimap <int, vector<Card>> ::iterator itr;
 
+   // print the score combination of the generated possible build
    for (itr = map.begin(); itr != map.end(); ++itr)
    {
       cout << "Score: " << itr->first;
@@ -257,6 +404,13 @@ void Score::printBuildMap(multimap<int, vector<Card>> map)
    }
 }
 
+// ****************************************************************
+// Function Name: ~Score
+// Purpose: destructor for Score class 
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Score::~Score()
 {
 }

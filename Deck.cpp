@@ -128,6 +128,13 @@ void Deck::setDeck(vector<Card> tempDeck)
    deck = tempDeck;
 }
 
+// ****************************************************************
+// Function Name: ~Deck
+// Purpose: destructor for the Deck class 
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Deck::~Deck()
 {
 }

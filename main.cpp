@@ -10,9 +10,10 @@
 
 int main()
 {
-   //Tournament tournament;
-   //tournament.startMenu();
+   // Let the Casino begin!
+   Tournament tournament;
+   tournament.startMenu();
 
    system("pause");
-	return 0;
+   return 0;
 }

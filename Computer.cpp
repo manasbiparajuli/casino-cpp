@@ -7,13 +7,21 @@
 
 #include "Computer.h"
 
+// ****************************************************************
+// Function Name: play
+// Purpose: describes the sequence of actions to perform in the current move
+// Parameters: tableCards, a vector of cards. Holds the current cards in play that are on the table
+//             oppoBuild, a tuple of string and vector of cards. Holds the opponent's single build
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Computer::play(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoBuild)
 {
    // Order in which computer will make a move
    // 1) Increase opponent's build
-   // 2) Make multiple builds
-   // 3) Make single build
-   // 4) Capture cards (both as a set or individual cards)
+   // 2) Capture cards (both as a set or individual cards)
+   // 3) Make multiple builds
+   // 4) Make single build
    // 5) Trail card
 
    // flag for when computer suceessfully makes a move
@@ -25,15 +33,23 @@ void Computer::play(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoB
    moveSuccess = increaseOpponentBuild(tableCards, oppoBuild);
    if (moveSuccess == true) 
    { 
-      cout << "Increased Opponent's Build" << endl;
+      cout << "Increased Opponent's Build." << endl;
       hasCapturedInCurMove = false; 
       return; 
+   }
+
+   moveSuccess = captureCards(tableCards);
+   if (moveSuccess == true)
+   {
+      cout << "Cards captured." << endl;
+      hasCapturedInCurMove = true;
+      return;
    }
 
    moveSuccess = makeMultipleBuild(tableCards);
    if (moveSuccess == true) 
    { 
-      cout << "Multiple Build Successful" << endl;
+      cout << "Multiple Build Successful." << endl;
       hasCapturedInCurMove = false; 
       return; 
    }
@@ -41,28 +57,27 @@ void Computer::play(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoB
    moveSuccess = makeSingleBuild(tableCards);
    if (moveSuccess == true) 
    { 
-      cout << "Single Build Successful" << endl;
+      cout << "Single Build Successful." << endl;
       hasCapturedInCurMove = false; 
-      return; 
-   }
-
-   moveSuccess = captureCards(tableCards);
-   if (moveSuccess == true) 
-   { 
-      cout << "Cards captured" << endl;
-      hasCapturedInCurMove = true; 
       return; 
    }
 
    moveSuccess = trailCard(tableCards);
    if (moveSuccess == true) 
    { 
-      cout << "Card trailed" << endl;
+      cout << "Card trailed." << endl;
       hasCapturedInCurMove = false; 
       return; 
    }
 }
 
+// ****************************************************************
+// Function Name: makeSingleBuild
+// Purpose: performs the sequence of actions to make a single build
+// Parameters: tableCards, a vector of cards. Holds the current cards in play that are on the table
+// Return value: a boolean. Returns whether the player was able to make a single build or not
+// Assistance Received: none
+// ****************************************************************
 bool Computer::makeSingleBuild(vector<Card>& tableCards)
 {
    // ensure that we check all the possible keys before we return
@@ -125,6 +140,8 @@ bool Computer::makeSingleBuild(vector<Card>& tableCards)
       {
          cout << cards.cardToString() << " ";
       }
+      cout << endl;
+
       removeCardFromHand(cardToRemove);
 
       // remove cards that made up build successfully from the table
@@ -135,6 +152,13 @@ bool Computer::makeSingleBuild(vector<Card>& tableCards)
    return false;
 }
 
+// ****************************************************************
+// Function Name: makeMultipleBuild
+// Purpose: performs the sequence of actions to make a multiple build
+// Parameters: tableCards, a vector of cards. Holds the current cards in play that are on the table
+// Return value: a boolean. Returns whether the player was able to make a multiple build or not
+// Assistance Received: none
+// ****************************************************************
 bool Computer::makeMultipleBuild(vector<Card>& tableCards)
 {
    // get the build score of last successful single build 
@@ -177,32 +201,49 @@ bool Computer::makeMultipleBuild(vector<Card>& tableCards)
    // We now repeat the steps that we took to build a single build
    //////////
 
-   // If there are no cards on the table, then we check if there are two hand cards equal the score
+   // we check if there are two hand cards equal the score
    // of the previous single build score. We need two cards because one card will be used to build a multibuild
    // while the other card will be used to capture the multiple build in the player's next turn
-   if (tableCards.size() == 0)
+   // store the number of cards with the same score as the previous build score
+   int sameCardScoreCount = 0;
+
+   // loop through the cards in the player's hand
+   for (auto handCardToBuildWith : getCardsOnHand())
    {
-      // store the number of cards with the same score as the previous build score
-      int sameCardScoreCount = 0;
-
-      // loop through the cards in the player's hand
-      for (auto handCardToBuildWith : getCardsOnHand())
+      if (calcSingleCardScore(handCardToBuildWith) == previousBuildScore)
       {
-         if (calcSingleCardScore(handCardToBuildWith) == previousBuildScore)
-         {
-            sameCardScoreCount++;
+         sameCardScoreCount++;
 
-            // we have cards with the same score. So, we can make a multiple build
-            if (sameCardScoreCount >= 2)
+         // we have cards with the same score. So, we can make a multiple build
+         if (sameCardScoreCount >= 2)
+         {
+            matchedTableCards.push_back(handCardToBuildWith);
+
+            // Explain move reasoning
+            cout << getPlayerName() << " played " << handCardToBuildWith.cardToString() << " to create a multiple build of ";
+            for (auto cards : matchedTableCards)
             {
-               matchedTableCards.push_back(handCardToBuildWith);
-               multipleBuildPossible = true;
+               cout << cards.cardToString() << " ";
             }
+            cout << ". It wanted to increase the number of builds. " << endl;
+
+            removeCardFromHand(handCardToBuildWith);
+            initiateMultipleBuild(matchedTableCards);
+
+            // remove cards that made up build successfully from the table
+            removeCardsFromTable(tableCards, matchedTableCards);
+            return true;
          }
       }
    }
 
-   else
+   // if there are no more than 1 card that match the score of the previous build,
+   // then multibuild is not possible
+   if (sameCardScoreCount < 2)
+   {
+      return false;
+   }
+   if (tableCards.size() > 0)
    {
       // Temporarily add a card to table to check if a build is possible
       for (auto handCardToBuildWith : getCardsOnHand())
@@ -258,7 +299,7 @@ bool Computer::makeMultipleBuild(vector<Card>& tableCards)
       {
          cout << cards.cardToString() << " ";
       }
-      cout << ". It wanted to increase the number of builds " << endl;
+      cout << ". It wanted to increase the number of builds. " << endl;
 
       removeCardFromHand(cardToRemove);
       initiateMultipleBuild(matchedTableCards);
@@ -270,6 +311,49 @@ bool Computer::makeMultipleBuild(vector<Card>& tableCards)
    return false;
 }
 
+// ****************************************************************
+// Function Name: initiateMultipleBuild
+// Purpose: makes multiple build from the successfully created multiple build  
+// Parameters: -> looseCardsSelected, a vector of cards. Holds the cards that make up the new multiple build
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
+void Computer::initiateMultipleBuild(vector<Card>& looseCardsSelected)
+{
+   // owner of the single build
+   string owner;
+
+   // cards in the single build
+   vector<Card> singleBuild;
+
+   // store multiple build card values
+   vector<vector<Card>> multipleBuild;
+
+   // unpack the tuple 
+   tie(owner, singleBuild) = singleBuildCard;
+
+   // push the newest build into multiple build
+   multipleBuild.push_back(looseCardsSelected);
+
+   // push the previous single build into multiple build
+   multipleBuild.push_back(singleBuild);
+
+   // create a tuple for the multiple build
+   multipleBuildCard = make_tuple(owner, multipleBuild);
+
+   // empty the single build tuple
+   singleBuild = {};
+   singleBuildCard = make_tuple("", singleBuild);
+}
+
+// ****************************************************************
+// Function Name: increaseOpponentBuild
+// Purpose: performs the sequence of actions to increase an opponent's build
+// Parameters: -> tableCards, a vector of cards. Holds the current cards in play that are on the table
+//             -> oppoBuild, a tuple of string and vector of cards. Holds the opponent's single build
+// Return value: a boolean. Returns whether the player was able to increase opponent's single build or not
+// Assistance Received: none
+// ****************************************************************
 bool Computer::increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoBuild)
 {
    // owner of the build
@@ -284,7 +368,6 @@ bool Computer::increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vec
    // return false if the build is not owned by the player or if the opponent's build is empty
    if (owner == getPlayerName() || (oppnBuildCard.size() == 0))
    {
-      cout << getPlayerName() << " cannot increment its own build!" << endl;
       return false;
    }
 
@@ -323,30 +406,18 @@ bool Computer::increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vec
    return false;
 }
 
-void Computer::initiateMultipleBuild(vector<Card>& looseCardsSelected)
-{
-   // owner of the single build
-   string owner;
-
-   // cards in the single build
-   vector<Card> singleBuild;
-
-   // store multiple build card values
-   vector<vector<Card>> multipleBuild;
-
-   // unpack the tuple 
-   tie(owner, singleBuild) = singleBuildCard;
-
-   // push the newest build into multiple build
-   multipleBuild.push_back(looseCardsSelected);
-
-   // push the previous single build into multiple build
-   multipleBuild.push_back(singleBuild);
-
-   // create a tuple for the multiple build
-   multipleBuildCard = make_tuple(owner, multipleBuild);
-}
-
+// ****************************************************************
+// Function Name: captureCards
+// Purpose: performs the sequence of actions to capture cards
+// Parameters: -> tableCards, a vector of cards. Holds the current cards in play that are on the table
+// Algorithm:
+//       1) Capture multiple builds first
+//       2) Capture single builds
+//       3) Capture set of cards
+//       4) Capture individual loose cards
+// Return value: a boolean. Returns whether the player was able to capture cards or not
+// Assistance Received: none
+// ****************************************************************
 bool Computer::captureCards(vector<Card>& tableCards)
 {
    for (auto handCard : getCardsOnHand())
@@ -394,7 +465,7 @@ bool Computer::captureCards(vector<Card>& tableCards)
             return true;
          }
          // capture single build
-         else if (isSingleBuildExist() == true)
+         if (isSingleBuildExist() == true)
          {
             // store the single build
             vector<Card> singleBuild;
@@ -438,10 +509,58 @@ bool Computer::captureCards(vector<Card>& tableCards)
          return true;
       }
    }
-   // not possible to capture any cards from builds or as set of cards
+
+   // the loose individual cards that can be captured from the table
+   vector<Card> matchedTableCards = {};
+
+   // flag if individual cards have been captured
+   bool indiCaptured = false;
+
+   // Selected hand card to capture individual cards 
+   Card cardToRemove;
+
+   // If there were no sets to capture, check if there are any individual loose cards to capture
+   for (auto handCard : getCardsOnHand())
+   {
+      int handCardScore = calcSingleCardScore(handCard);
+
+      // Add any single card from the table that matches the score of the current card in player's hand
+      for (auto tableCard : tableCards)
+      {
+         if (calcSingleCardScore(tableCard) == handCardScore)
+         {
+            // Explain move reasoning
+            cout << getPlayerName() << " played " << handCard.cardToString() << " to capture individual card ";
+            cout << tableCard.cardToString() << " " << endl;
+
+            cardToRemove = handCard;
+            cardsOnPile.push_back(tableCard);
+            matchedTableCards.push_back(tableCard);
+            indiCaptured = true;
+         }
+      }
+
+      if (indiCaptured == true)
+      {
+         cardsOnPile.push_back(cardToRemove);
+         removeCardFromHand(cardToRemove);
+         removeCardsFromTable(tableCards, matchedTableCards);
+         return true;
+      }
+   }
+
+   // not possible to capture any cards from builds or as set of cards or as individual cards
    return false;
 }
 
+// ****************************************************************
+// Function Name: captureSetCards
+// Purpose: performs the sequence of actions to capture set of cards
+// Parameters: -> tableCards, a vector of cards. Holds the current cards in play that are on the table
+//             -> handSelCard, a Card object. Holds the card that will be used to capture set of cards
+// Return value: a boolean. Returns whether the player was able to capture set of cards or not
+// Assistance Received: none
+// ****************************************************************
 bool Computer::captureSetCards(vector<Card>& tableCards, Card & handSelCard)
 {
    // ensure that we check all the possible keys before we return
@@ -484,42 +603,43 @@ bool Computer::captureSetCards(vector<Card>& tableCards, Card & handSelCard)
          }
 
          cout << ". It wanted to maximize the number of captured cards." << endl;
-      }
-   }
+         
+         // Add any single card from the table that matches the score of the current card in player's hand
+         for (auto tableCard : tableCards)
+         {
+            if (calcSingleCardScore(tableCard) == handCardScore)
+            {            
+               // Explain move reasoning
+               cout << getPlayerName() << " played " << handSelCard.cardToString() << " to capture individual card ";
+               cout << tableCard.cardToString() << " " << endl;
 
-   // Add any single card from the table that matches the score of the current card in player's hand
-   for (auto tableCard : tableCards)
-   {
-      // Explain move reasoning
-      cout << getPlayerName() << " played " << handSelCard.cardToString() << " to capture individual card ";
+               cardsOnPile.push_back(tableCard);
+               matchedTableCards.push_back(tableCard);
+            }
+            cout << endl;
+         }
 
-      if (calcSingleCardScore(tableCard) == handCardScore)
-      {
-         cout << tableCard.cardToString() << " ";
-
-         cardsOnPile.push_back(tableCard);
+         // add the hand card that was used to capture to computer's pile
+         // then remove it from its hand
          cardsOnPile.push_back(handSelCard);
-         matchedTableCards.push_back(tableCard);
-         setPossible = true;
+         removeCardFromHand(handSelCard);
+
+         // if capturing of sets was possible, then remove the captured cards from the table 
+         removeCardsFromTable(tableCards, matchedTableCards);
+         return true;
       }
-      cout << endl;
    }
-
-   // if capturing of sets was possible, then remove the captured cards from the table 
-   // and the card that was used to capture from player's hand
-   // Then, return true from the function
-   if (setPossible)
-   {
-      // remove cards that were captured successfully from the table
-      removeCardsFromTable(tableCards, matchedTableCards);
-      removeCardFromHand(handSelCard);
-      return true;
-   }
-
    // no matching keys found
    return false;
 }
 
+// ****************************************************************
+// Function Name: trailCard
+// Purpose: performs the sequence of actions to trail a card
+// Parameters: -> tableCards, a vector of cards. Holds the current cards in play that are on the table
+// Return value: a boolean. Returns whether the player was able to trail a card or not
+// Assistance Received: none
+// ****************************************************************
 bool Computer::trailCard(vector<Card>& tableCards)
 {
    // store the size of the table cards
@@ -528,7 +648,6 @@ bool Computer::trailCard(vector<Card>& tableCards)
    // Cannot trail if there exists a build owned by the player
    if (isSingleBuildExist() == true || isMultipleBuildExist() == true)
    {
-      cout << "Invalid move to trail. Builds exist. " << endl;
       return false;
    }
 
@@ -556,6 +675,13 @@ bool Computer::trailCard(vector<Card>& tableCards)
    return true;
 }
 
+// ****************************************************************
+// Function Name: ~Computer
+// Purpose: destructor for Computer class 
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Computer::~Computer()
 {
 }

@@ -14,12 +14,18 @@
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
-Player::Player(string name = ""):playerName(name)
+Player::Player(string name = "") : playerName(name)
 {
    score = 0;
    firstBuildScore = 0;
    vector<Card> temp = {};
    singleBuildCard = make_tuple("", temp);
+
+   cardsOnPile = {};
+   cardsOnHand = {};
+
+   vector<vector<Card>> temp2 = {};
+   multipleBuildCard = make_tuple("", temp2);
 }
 
 // ****************************************************************
@@ -34,6 +40,13 @@ void Player::addCardsToHand(Card card)
    cardsOnHand.push_back(card);
 }
 
+// ****************************************************************
+// Function Name: addCardsToPile
+// Purpose: adds cards to the players' pile
+// Parameters: card, a Card object. It holds the current card to be added.
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Player::addCardsToPile(Card card)
 {
    cardsOnPile.push_back(card);
@@ -42,7 +55,7 @@ void Player::addCardsToPile(Card card)
 // ****************************************************************
 // Function Name: playerCardsOnHand
 // Purpose: prints the current cards on the player's hand
-// Parameter: playerIdentifier, a string. The identifier is either "Human" or "Computer"
+// Parameter: none
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
@@ -50,7 +63,7 @@ void Player::printCardsOnHand()
 {
    cout << getPlayerName() + " cards on Hand: ";
 
-   for (auto card : cardsOnHand)
+   for (auto card : getCardsOnHand())
    {
       cout << card.cardToString() + " ";
    }
@@ -60,7 +73,7 @@ void Player::printCardsOnHand()
 // ****************************************************************
 // Function Name: playerCardsOnPile
 // Purpose: prints the current cards on the player's pile
-// Parameter: playerIdentifier, a string. The identifier is either "Human" or "Computer"
+// Parameter: none
 // Return value: none
 // Assistance Received: none
 // ****************************************************************
@@ -68,18 +81,28 @@ void Player::printCardsOnPile()
 {
    cout << getPlayerName() + " cards on Pile: ";
 
-   for (auto card : cardsOnPile)
+   for (auto card : getCardsOnPile())
    {
       cout << card.cardToString() + " ";
    }
    cout << endl;
 }
 
+// ****************************************************************
+// Function Name: printSingleBuild
+// Purpose: prints the single build of the players
+// Parameter: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Player::printSingleBuild()
 {
    vector<Card> build;
+
+   // unpack the single build tuple and print the cards
    tie(ignore, build) = singleBuildCard;
    
+   // print the single build if it exists
    if (isSingleBuildExist() == true)
    {
       cout << " [";
@@ -88,15 +111,24 @@ void Player::printSingleBuild()
          cout << cards.cardToString() << " ";
       }
       cout << "]";
-      cout << endl;
    }
 }
 
+// ****************************************************************
+// Function Name: printMultipleBuild
+// Purpose: prints the multiple build of the players
+// Parameter: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Player::printMultipleBuild()
 {
    vector<vector<Card>> multiBuild;
+
+   // unpack the multiple build tuple and print the code
    tie(ignore, multiBuild) = multipleBuildCard;
 
+   // print the multiple build if it exists
    if (isMultipleBuildExist() == true)
    {
       cout << " [ ";
@@ -139,11 +171,25 @@ vector<Card> Player::getCardsOnHand() const
    return cardsOnHand;
 }
 
+// ****************************************************************
+// Function Name: setCardsOnHand
+// Purpose: sets the current cards on the player's hand
+// Parameter: cardSelected, a vector of Cards. Holds the new hand cards for the player
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Player::setCardsOnHand(vector<Card> cardSelected)
 {
-   cardsOnHand = cardSelected;
+   cardsOnHand.assign(cardSelected.begin(), cardSelected.end());
 }
 
+// ****************************************************************
+// Function Name: setCardsOnPile
+// Purpose: sets the current cards on the player's pile
+// Parameter: cardSelected, a vector of Cards. Holds the new pile cards for the player
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Player::setCardsOnPile(vector<Card> cardSelected)
 {
    cardsOnPile = cardSelected;
@@ -174,31 +220,73 @@ int Player::getPlayerScore() const
    return score;
 }
 
+// ****************************************************************
+// Function Name: getFirstBuildScore
+// Purpose: gets the first build score of the player
+// Parameter: none
+// Return value: The current score of the player's valid build
+// Assistance Received: none
+// ****************************************************************
 int Player::getFirstBuildScore() const
 {
    return firstBuildScore;
 }
 
+// ****************************************************************
+// Function Name: setFirstBuildScore
+// Purpose: sets the first build score of the player
+// Parameter: score, an integer value. The score of the valid build. 
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Player::setFirstBuildScore(int score)
 {
    firstBuildScore = score;
 }
 
+// ****************************************************************
+// Function Name: getPlayerName
+// Purpose: gets the name of the player
+// Parameter: none
+// Return value: The current name of the player
+// Assistance Received: none
+// ****************************************************************
 string Player::getPlayerName() const
 {
    return playerName;
 }
 
+// ****************************************************************
+// Function Name: getSingleBuild
+// Purpose: gets the successful single build of the player
+// Parameter: none
+// Return value: a tuple of owner as string and single build as vector of cards
+// Assistance Received: none
+// ****************************************************************
 tuple<string, vector<Card>> Player::getSingleBuild() const 
 {
    return singleBuildCard;
 }
 
+// ****************************************************************
+// Function Name: setSingleBuild
+// Purpose: sets the successful single build of the player
+// Parameter: build, a tuple of owner as string and single build as vector of cards
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Player::setSingleBuild(tuple<string, vector<Card>> build)
 {
    singleBuildCard = build;
 }
 
+// ****************************************************************
+// Function Name: getMultipleBuild
+// Purpose: gets the successful multiple build of the player
+// Parameter: none
+// Return value: a tuple of owner as string and multiple builds as vector of vector of cards
+// Assistance Received: none
+// ****************************************************************
 tuple<string, vector<vector<Card>>> Player::getMultipleBuild() const
 {
    return multipleBuildCard;
@@ -242,6 +330,14 @@ bool Player::isCardOnPile(string cardSelected) const
    return false;
 }
 
+// ****************************************************************
+// Function Name: isCardOnTable
+// Purpose: checks if the card selected by the player is in the table
+// Parameter: cardSelected, a string. The card selected by the player
+//            cardsOnTable, a vector of cards. The ongoing cards on the table
+// Return value: returns a boolean that checks if the card is on table
+// Assistance Received: none
+// ****************************************************************
 bool Player::isCardOnTable(string cardSelected, vector<Card> cardsOnTable) const
 {
    for (auto card : cardsOnTable)
@@ -254,6 +350,13 @@ bool Player::isCardOnTable(string cardSelected, vector<Card> cardsOnTable) const
    return false;
 }
 
+// ****************************************************************
+// Function Name: isDigit
+// Purpose: checks if all the characters in a string are digits
+// Parameters: temp, a string.
+// Return value: a boolean that returns if a string is entirely composed of digits
+// Assistance Received: none
+// ****************************************************************
 bool Player::isDigit(string temp) const
 {
    for (auto i : temp)
@@ -263,6 +366,13 @@ bool Player::isDigit(string temp) const
    return true;
 }
 
+// ****************************************************************
+// Function Name: isMultipleBuildExist
+// Purpose: checks if the player has a multiple build
+// Parameters: none
+// Return value: a boolean that returns if a player has a multiple build
+// Assistance Received: none
+// ****************************************************************
 bool Player::isMultipleBuildExist() const
 {
    vector<vector<Card>> multipleBuild;
@@ -275,10 +385,16 @@ bool Player::isMultipleBuildExist() const
    {
       return true;
    }
-
    return false;
 }
 
+// ****************************************************************
+// Function Name: isSingleBuildExist
+// Purpose: checks if the player has a single build
+// Parameters: none
+// Return value: a boolean that returns if a player has a single build
+// Assistance Received: none
+// ****************************************************************
 bool Player::isSingleBuildExist() const
 {
    vector<Card> singleBuild;
@@ -291,15 +407,29 @@ bool Player::isSingleBuildExist() const
    {
       return true;
    }
-
    return false;
 }
 
+// ****************************************************************
+// Function Name: hasCapturedCard
+// Purpose: checks if the player has captured any cards in current move
+// Parameters: none
+// Return value: a boolean that returns if a player captured any cards 
+//                in the current move
+// Assistance Received: none
+// ****************************************************************
 bool Player::hasCapturedCard() const
 {
    return hasCapturedInCurMove;
 }
 
+// ****************************************************************
+// Function Name: getString
+// Purpose: converts a character into a string
+// Parameters: x, a character. Holds any character that needs conversion to string
+// Return value: the string representation of the character
+// Assistance Received: none
+// ****************************************************************
 string Player::getString(char x)
 {
    string temp(1, x);
@@ -307,7 +437,7 @@ string Player::getString(char x)
 }
 
 // ****************************************************************
-// Function Name: cardScore
+// Function Name: calcSingleCardScore
 // Purpose: calculate the numerical equivalent of a card
 // Parameters: tempCard, a string value of a card
 // Return value: integer value, the numerical equivalent of a card
@@ -333,6 +463,14 @@ int Player::calcSingleCardScore(Card tempCard)
    return 0;
 }
 
+// ****************************************************************
+// Function Name: calcLooseCardScore
+// Purpose: calculates the total score of a vector of cards
+// Parameters: looseCards, a vector of cards. Holds the cards whose 
+//                   score needs to be determined
+// Return value: integer value, the score of the total cards
+// Assistance Received: none
+// ****************************************************************
 int Player::calcLooseCardScore(vector<Card> looseCards)
 {
    int score = 0;
@@ -343,22 +481,52 @@ int Player::calcLooseCardScore(vector<Card> looseCards)
    return score;
 }
 
+// ****************************************************************
+// Function Name: removeCardFromHand
+// Purpose: remove the card from hand
+// Parameters: cardToRemove, a card object that needs to be 
+//                   removed from player's hand
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Player::removeCardFromHand(Card& cardToRemove)
 {
    vector<Card> temp = getCardsOnHand();
 
+   // find and remove the selected card from the table
    temp.erase(remove(temp.begin(), temp.end(), cardToRemove), temp.end());
+
+   // set the modified card on the hand
    setCardsOnHand(temp);
 }
 
+// ****************************************************************
+// Function Name: removeCardFromTable
+// Purpose: remove the group of cards from table
+// Parameters: tableCards, a vector of cards. Holds the cards that are
+//                   in the table.
+//             looseCards, a vector of cards that need to be 
+//                   removed from the table
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Player::removeCardsFromTable(vector<Card>& tableCards, vector<Card> looseCards)
 {
+   // remove the selected group of cards from the table
    for (auto builtCards : looseCards)
    {
       tableCards.erase(remove(tableCards.begin(), tableCards.end(), builtCards), tableCards.end());
    }
 }
 
+// ****************************************************************
+// Function Name: findCommonCard
+// Purpose: finds the card in common with the player's hand
+// Parameters: matchedTableCards, a vector of cards. Holds the cards that were
+//                   used to perform an action in the current move.
+// Return value: a card object. Returns the card that was in common with the set of matched cards
+// Assistance Received: none
+// ****************************************************************
 Card Player::findCommonCard(const vector<Card>& matchedTableCards)
 {
    // loop through the cards in the player's hand to check if any card
@@ -374,6 +542,13 @@ Card Player::findCommonCard(const vector<Card>& matchedTableCards)
    return Card();
 }
 
+// ****************************************************************
+// Function Name: ~Player
+// Purpose: destructor for Player class 
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Player::~Player()
 {
 }

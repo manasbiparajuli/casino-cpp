@@ -7,6 +7,14 @@
 
 #include "Human.h"
 
+// ****************************************************************
+// Function Name: play
+// Purpose: describes the sequence of actions to perform in the current move
+// Parameters: tableCards, a vector of cards. Holds the current cards in play that are on the table
+//             oppoBuild, a tuple of string and vector of cards. Holds the opponent's single build
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Human::play(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoBuild)
 {
    // store the choice made by the user
@@ -64,6 +72,13 @@ void Human::play(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoBuil
    } while (moveSuccess == false);
 }
 
+// ****************************************************************
+// Function Name: makeSingleBuild
+// Purpose: performs the sequence of actions to make a single build
+// Parameters: tableCards, a vector of cards. Holds the current cards in play that are on the table
+// Return value: a boolean. Returns whether the player was able to make a single build or not
+// Assistance Received: none
+// ****************************************************************
 bool Human::makeSingleBuild(vector<Card>& tableCards)
 {
    // hand card used to make a build, input as string
@@ -150,6 +165,13 @@ bool Human::makeSingleBuild(vector<Card>& tableCards)
    return false;
 }
 
+// ****************************************************************
+// Function Name: makeMultipleBuild
+// Purpose: performs the sequence of actions to make a multiple build
+// Parameters: tableCards, a vector of cards. Holds the current cards in play that are on the table
+// Return value: a boolean. Returns whether the player was able to make a multiple build or not
+// Assistance Received: none
+// ****************************************************************
 bool Human::makeMultipleBuild(vector<Card>& tableCards)
 {
    // get the build score of last successful single build 
@@ -325,6 +347,14 @@ bool Human::makeMultipleBuild(vector<Card>& tableCards)
    return false;
 }
 
+// ****************************************************************
+// Function Name: increaseOpponentBuild
+// Purpose: performs the sequence of actions to increase an opponent's build
+// Parameters: -> tableCards, a vector of cards. Holds the current cards in play that are on the table
+//             -> oppoBuild, a tuple of string and vector of cards. Holds the opponent's single build
+// Return value: a boolean. Returns whether the player was able to increase opponent's single build or not
+// Assistance Received: none
+// ****************************************************************
 bool Human::increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vector<Card>>& oppoBuild)
 {
    // string input of the card that the player will use to increase opponent's build
@@ -367,6 +397,7 @@ bool Human::increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vector
       if (calcSingleCardScore(handCard) == calcLooseCardScore(oppnBuildCard))
       {
          cout << "Successfully increased opponent's build." << endl;
+         firstBuildScore = calcSingleCardScore(handCard);
 
          // store the new build into the human's single build
          // and set the opponent's build to be empty
@@ -383,6 +414,14 @@ bool Human::increaseOpponentBuild(vector<Card>& tableCards, tuple<string, vector
    return false;
 }
 
+// ****************************************************************
+// Function Name: initiateBuild
+// Purpose: makes single build from the successfully created single build  
+// Parameters: -> looseCardsSelected, a vector of cards. Holds the cards that make up the new single build
+//             -> handCardScore, an integer. Holds the score of the newly created single build
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Human::initiateBuild(vector<Card> &looseCardsSelected, int handCardScore)
 {
    vector<Card> build;
@@ -400,6 +439,13 @@ void Human::initiateBuild(vector<Card> &looseCardsSelected, int handCardScore)
    cout << "Single build successful!" << endl;
 }
 
+// ****************************************************************
+// Function Name: initiateMultipleBuild
+// Purpose: makes multiple build from the successfully created multiple build  
+// Parameters: -> looseCardsSelected, a vector of cards. Holds the cards that make up the new multiple build
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 void Human::initiateMultipleBuild(vector<Card>& looseCardsSelected)
 {
    // owner of the single build
@@ -430,6 +476,13 @@ void Human::initiateMultipleBuild(vector<Card>& looseCardsSelected)
    cout << "Multiple build successful!" << endl;
 }
 
+// ****************************************************************
+// Function Name: captureCards
+// Purpose: performs the sequence of actions to capture cards
+// Parameters: -> tableCards, a vector of cards. Holds the current cards in play that are on the table
+// Return value: a boolean. Returns whether the player was able to capture cards or not
+// Assistance Received: none
+// ****************************************************************
 bool Human::captureCards(vector<Card>& tableCards)
 {
    // user input for their selected card to be used to capture cards
@@ -461,6 +514,8 @@ bool Human::captureCards(vector<Card>& tableCards)
    {
       cin >> captureChoice;
    } while (!(captureChoice >= 1 && captureChoice <= 3));
+
+   cout << "\n******************************************************************************" << endl;
 
    // get the handcard that the user wants to use to capture cards
    cout << "From your hand, enter the card (eg. S3) that you will use to" << endl;
@@ -568,6 +623,14 @@ bool Human::captureCards(vector<Card>& tableCards)
    return false;
 }
 
+// ****************************************************************
+// Function Name: captureSingleBuild
+// Purpose: performs the sequence of actions to capture player's single build
+// Parameters: -> handCardScore, an integer. Holds the score of the single build
+//             -> selectedHandCard, a Card object. Holds the card that will be used to capture single build
+// Return value: a boolean. Returns whether the player was able to capture single builds
+// Assistance Received: none
+// ****************************************************************
 bool Human::captureSingleBuild(int handCardScore, Card &selectedHandCard)
 {
    // single build card of the player
@@ -611,6 +674,14 @@ bool Human::captureSingleBuild(int handCardScore, Card &selectedHandCard)
    return false;
 }
 
+// ****************************************************************
+// Function Name: captureMultipleBuild
+// Purpose: performs the sequence of actions to capture player's multiple build
+// Parameters: -> handCardScore, an integer. Holds the score of the single build
+//             -> selectedHandCard, a Card object. Holds the card that will be used to capture multiple build
+// Return value: a boolean. Returns whether the player was able to capture multiple builds
+// Assistance Received: none
+// ****************************************************************
 bool Human::captureMultipleBuild(int handCardScore, Card &selectedHandCard)
 {
    // multiple build cards of the player
@@ -657,6 +728,14 @@ bool Human::captureMultipleBuild(int handCardScore, Card &selectedHandCard)
    return false;
 }
 
+// ****************************************************************
+// Function Name: captureSetCards
+// Purpose: performs the sequence of actions to capture set of cards
+// Parameters: -> tableCards, a vector of cards. Holds the current cards in play that are on the table
+//             -> selectedHandCard, a Card object. Holds the card that will be used to capture set of cards
+// Return value: a boolean. Returns whether the player was able to capture set of cards or not
+// Assistance Received: none
+// ****************************************************************
 bool Human::captureSetCards(vector<Card>& tableCards, Card& selectedHandCard)
 {
    // cards to capture as a set
@@ -676,6 +755,8 @@ bool Human::captureSetCards(vector<Card>& tableCards, Card& selectedHandCard)
 
    int setCaptureCount = 0, looseCaptureCount = 0;
 
+   cout << "\n******************************************************************************" << endl;
+
    // Ask user for the number of sets that they want to capture
    cout << "\nEnter the number of set of cards that you want to capture : ";
    do
@@ -690,7 +771,7 @@ bool Human::captureSetCards(vector<Card>& tableCards, Card& selectedHandCard)
    for (short int i = 0; i < setCaptureCount; i++)
    {
       // Get the cards to capture in the current set
-      cout << "Enter the number of loose cards that you want to capture in set " << i << endl;
+      cout << "Enter the number of loose cards that you want to capture in set " << i + 1 << endl;
       do
       {
          cin >> combineTotalLooseCards;
@@ -736,6 +817,13 @@ bool Human::captureSetCards(vector<Card>& tableCards, Card& selectedHandCard)
    return false;
 }
 
+// ****************************************************************
+// Function Name: trailCard
+// Purpose: performs the sequence of actions to trail a card
+// Parameters: -> tableCards, a vector of cards. Holds the current cards in play that are on the table
+// Return value: a boolean. Returns whether the player was able to trail a card or not
+// Assistance Received: none
+// ****************************************************************
 bool Human::trailCard(vector<Card>& tableCards)
 {
    string cardSelectHand;
@@ -776,10 +864,17 @@ bool Human::trailCard(vector<Card>& tableCards)
    tableCards.push_back(trailCard);
    removeCardFromHand(trailCard);
 
-   // Human trailed the card successsfully
+   cout << "Trailed the card successfully!" << endl;
    return true;
 }
 
+// ****************************************************************
+// Function Name: ~Human
+// Purpose: destructor for Human class 
+// Parameters: none
+// Return value: none
+// Assistance Received: none
+// ****************************************************************
 Human::~Human()
 {
 }

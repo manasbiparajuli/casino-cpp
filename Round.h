@@ -17,12 +17,11 @@
 class Round
 {   
 public:
+   Round();
    Round(string next, string lastCap, int rnd);
-
    void createPlayers();
 
    void startGame();
-
    void loadGame();
    void setSavedPreferences(int lineNumber, string line);
    vector<Card> makeCardFromFile(vector<string> cards);
@@ -68,8 +67,6 @@ public:
    void printCardsOnPile();
 
    ~Round();
-
-   void test() {};
 
 private:
    int roundNumber;

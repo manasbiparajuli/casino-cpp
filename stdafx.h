@@ -2,7 +2,7 @@
 //* Name: Manasbi Parajuli
 //* Project: Casino
 //* Class: CMPS 366-01
-//* Date: 10/2/2018
+//* Date: 10/23/2018
 //****************************************************
 
 // The header file serves as a container for all the libraries that will be used for the project
@@ -13,15 +13,13 @@
 #include <string>
 #include <vector>
 
-#include <algorithm> // shuffle()
-                     // remove()
+#include <algorithm> 
 #include <random>
 #include <chrono>
 
-#include <cctype> // toupper()
+#include <cctype>
 #include <fstream>
 
-#include <limits>
 #include <cctype>
 
 #include <tuple>
